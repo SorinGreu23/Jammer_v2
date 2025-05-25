@@ -1,0 +1,25 @@
+-- Create TEAM table
+CREATE TABLE IF NOT EXISTS TEAM (
+    id BIGINT IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(1000)
+);
+
+-- Create TASK table
+CREATE TABLE IF NOT EXISTS TASK (
+    id BIGINT IDENTITY PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description VARCHAR(1000),
+    status VARCHAR(50) NOT NULL,
+    team_id BIGINT,
+    FOREIGN KEY (team_id) REFERENCES TEAM(id)
+);
+
+-- Create DIAGRAM table
+CREATE TABLE IF NOT EXISTS DIAGRAM (
+    id BIGINT IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    content TEXT,
+    team_id BIGINT,
+    FOREIGN KEY (team_id) REFERENCES TEAM(id)
+);
