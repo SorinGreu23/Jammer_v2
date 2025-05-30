@@ -21,7 +21,7 @@ public class PasswordHasherImpl implements PasswordHasher {
 
     @Override
     public boolean matches(String rawPassword, String hashedPassword) {
-        if(hashedPassword == null || hashedPassword.startsWith("$2a$")) {
+        if(hashedPassword == null || hashedPassword.startsWith("$2b$")) {
             throw new IllegalArgumentException("Invalid hashed password format");
         }
         return BCrypt.checkpw(rawPassword, hashedPassword);

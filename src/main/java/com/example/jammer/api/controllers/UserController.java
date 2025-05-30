@@ -2,7 +2,10 @@ package com.example.jammer.api.controllers;
 
 import com.example.jammer.api.dtos.CreateUserRequest;
 import com.example.jammer.api.dtos.CreateUserResponse;
+import com.example.jammer.api.dtos.LoginUserRequest;
+import com.example.jammer.api.dtos.LoginUserResponse;
 import com.example.jammer.application.user.CreateUserUseCase;
+import com.example.jammer.application.user.LoginUserUseCase;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final CreateUserUseCase createUserUseCase;
+    private final LoginUserUseCase loginUserUseCase;
 
-    public UserController(CreateUserUseCase createUserUseCase) {
+    public UserController(CreateUserUseCase createUserUseCase, LoginUserUseCase loginUserUseCase) {
         this.createUserUseCase = createUserUseCase;
+        this.loginUserUseCase = loginUserUseCase;
     }
 
     @PostMapping("/register")
@@ -21,6 +26,12 @@ public class UserController {
     public CreateUserResponse registerUser(
             @RequestBody CreateUserRequest request) {
         return createUserUseCase.execute(request);
+    }
+
+    @PostMapping("/login")
+    @ResponseStatus(HttpStatus.OK)
+    public LoginUserResponse loginUser(@RequestBody LoginUserRequest request) {
+        return loginUserUseCase.execute(request);
     }
 }
 
