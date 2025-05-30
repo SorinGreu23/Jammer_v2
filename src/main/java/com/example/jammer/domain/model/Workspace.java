@@ -1,4 +1,4 @@
-package com.example.jammer.domain;
+package com.example.jammer.domain.model;
 
 import lombok.Getter;
 import lombok.Setter;

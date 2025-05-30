@@ -1,4 +1,4 @@
-package com.example.jammer.domain;
+package com.example.jammer.domain.model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -25,4 +25,12 @@ public class User {
     @Getter
     @Setter
     private Date createdAt;
+
+    public User(Integer id, String username, String email, String passwordHash, Date createdAt) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.createdAt = createdAt;
+    }
 }
