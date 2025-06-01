@@ -1,0 +1,19 @@
+.account-container {
+  padding: 20px;
+  color: #fff; // Basic text color for now
+  min-height: calc(100vh - 70px); // Adjust 70px based on actual navbar height
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1.2rem;
+  }
+}

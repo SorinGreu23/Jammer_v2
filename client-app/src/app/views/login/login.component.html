@@ -1,0 +1,58 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h2>Welcome Back</h2>
+      <p>Please sign in to your account</p>
+    </div>
+    
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form">
+      <div class="field">
+        <label for="email">Email</label>
+        <input 
+          pInputText 
+          id="email" 
+          formControlName="email"
+          placeholder="Enter your email"
+          [class.ng-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+        />        <small 
+          *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" 
+          class="p-error"
+        >
+          Email is required
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <p-password 
+          id="password"
+          formControlName="password"
+          placeholder="Enter your password"
+          [toggleMask]="true"
+          [feedback]="false"
+          styleClass="w-full"
+        ></p-password>
+        <small 
+          *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" 
+          class="p-error"
+        >
+          Password is required
+        </small>
+      </div>
+
+      <p-button 
+        type="submit"
+        label="Sign In"
+        styleClass="w-full"
+        [loading]="isLoading"
+        [disabled]="loginForm.invalid"
+      ></p-button>
+    </form>
+
+    <div class="login-footer">
+      <p>Don't have an account? <a routerLink="/register">Sign up here</a></p>
+    </div>
+  </div>
+</div>
+
+<p-toast></p-toast>

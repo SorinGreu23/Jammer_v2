@@ -1,0 +1,56 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h2>Welcome Back</h2>
+      <p>Please sign in to your account</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onLogin()" class="login-form">
+      <div class="field">
+        <label for="username">Username</label>
+        <input pInputText id="username" formControlName="username" placeholder="Enter your username"
+          [class.ng-invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" /> <small
+          *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" class="p-error">
+          Email is required
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input pInputText id="email" formControlName="email" placeholder="Enter your email"
+          [class.ng-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" /> <small
+          *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" class="p-error">
+          Email is required
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <p-password id="password" formControlName="password" placeholder="Enter your password" [toggleMask]="true"
+          [feedback]="false" styleClass="w-full"></p-password>
+        <small *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" class="p-error">
+          Password is required
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="confirmPassword">Confirm Password</label>
+        <p-password id="confirmPassword" formControlName="confirmPassword" placeholder="Confirm your password"
+          [toggleMask]="true" [feedback]="false" styleClass="w-full"></p-password>
+        <small *ngIf="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched"
+          class="p-error">
+          Password is required
+        </small>
+      </div>
+
+      <p-button type="submit" label="Sign Up" styleClass="w-full" [loading]="isLoading"
+        [disabled]="registerForm.invalid"></p-button>
+    </form>
+
+    <div class="login-footer">
+      <p>Already have an account? <a routerLink="/login">Log in here</a></p>
+    </div>
+  </div>
+</div>
+
+<p-toast></p-toast>
