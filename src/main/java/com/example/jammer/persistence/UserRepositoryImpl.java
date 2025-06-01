@@ -2,7 +2,7 @@ package com.example.jammer.persistence;
 
 import com.example.jammer.domain.model.User;
 import com.example.jammer.domain.repository.UserRepository;
-import org.springframework.context.annotation.Bean;
+import com.example.jammer.infrastructure.ConnectionFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -12,10 +12,11 @@ import java.util.Optional;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
-    private final DataSource dataSource;
 
-    public UserRepositoryImpl(DataSource dataSource) {
-        this.dataSource = dataSource;
+    private final ConnectionFactory connectionFactory;
+
+    public UserRepositoryImpl(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
     }
 
     @Override
@@ -25,7 +26,7 @@ public class UserRepositoryImpl implements UserRepository {
               FROM [Workspace].[Users]
              WHERE [Username] = ?
             """;
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = connectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, username);
@@ -44,7 +45,7 @@ public class UserRepositoryImpl implements UserRepository {
               FROM [Workspace].[Users]
              WHERE [Email] = ?
             """;
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = connectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
@@ -63,7 +64,7 @@ public class UserRepositoryImpl implements UserRepository {
               FROM [Workspace].[Users]
              WHERE [Id] = ?
             """;
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = connectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
@@ -85,7 +86,7 @@ public class UserRepositoryImpl implements UserRepository {
               FROM [Workspace].[Users]
              WHERE [Email] = ?
             """;
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = connectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
@@ -115,7 +116,7 @@ public class UserRepositoryImpl implements UserRepository {
                 ([Username], [Email], [PasswordHash], [CreatedAt])
             VALUES (?, ?, ?, ?)
             """;
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = connectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, user.getUsername());
@@ -152,7 +153,7 @@ public class UserRepositoryImpl implements UserRepository {
                    [PasswordHash] = ?
              WHERE [Id]           = ?
             """;
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = connectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, user.getUsername());

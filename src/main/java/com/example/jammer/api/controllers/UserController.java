@@ -1,9 +1,9 @@
 package com.example.jammer.api.controllers;
 
-import com.example.jammer.api.dtos.CreateUserRequest;
-import com.example.jammer.api.dtos.CreateUserResponse;
-import com.example.jammer.api.dtos.LoginUserRequest;
-import com.example.jammer.api.dtos.LoginUserResponse;
+import com.example.jammer.api.dtos.user.CreateUserRequest;
+import com.example.jammer.api.dtos.user.CreateUserResponse;
+import com.example.jammer.api.dtos.user.LoginUserRequest;
+import com.example.jammer.api.dtos.user.LoginUserResponse;
 import com.example.jammer.application.user.CreateUserUseCase;
 import com.example.jammer.application.user.LoginUserUseCase;
 import org.springframework.http.HttpStatus;

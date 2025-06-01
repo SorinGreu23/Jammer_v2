@@ -1,4 +1,4 @@
-package com.example.jammer.api.dtos;
+package com.example.jammer.api.dtos.user;
 
 import lombok.Getter;
 import lombok.Setter;

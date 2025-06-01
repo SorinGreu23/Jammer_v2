@@ -1,7 +1,7 @@
 package com.example.jammer.application.user;
 
-import com.example.jammer.api.dtos.CreateUserRequest;
-import com.example.jammer.api.dtos.CreateUserResponse;
+import com.example.jammer.api.dtos.user.CreateUserRequest;
+import com.example.jammer.api.dtos.user.CreateUserResponse;
 import com.example.jammer.application.user.exception.EmailAlreadyExistsException;
 import com.example.jammer.application.user.exception.UsernameAlreadyExistsException;
 import com.example.jammer.domain.model.User;

@@ -1,7 +1,7 @@
 package com.example.jammer.application.user;
 
-import com.example.jammer.api.dtos.LoginUserRequest;
-import com.example.jammer.api.dtos.LoginUserResponse;
+import com.example.jammer.api.dtos.user.LoginUserRequest;
+import com.example.jammer.api.dtos.user.LoginUserResponse;
 import com.example.jammer.application.user.exception.InvalidLoginException;
 import com.example.jammer.domain.model.User;
 import com.example.jammer.domain.repository.UserRepository;

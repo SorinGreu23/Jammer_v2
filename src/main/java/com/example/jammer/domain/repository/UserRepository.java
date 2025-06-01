@@ -1,7 +1,6 @@
 package com.example.jammer.domain.repository;
 
 import com.example.jammer.domain.model.User;
-import org.springframework.context.annotation.Bean;
 
 import java.util.Optional;
 

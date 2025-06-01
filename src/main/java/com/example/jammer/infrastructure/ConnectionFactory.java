@@ -15,6 +15,4 @@ public class ConnectionFactory {
     public Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
-
-
 }
