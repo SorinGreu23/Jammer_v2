@@ -33,4 +33,8 @@ public class Task {
     @Getter
     @Setter
     private Integer userId;
+
+    @Getter
+    @Setter
+    private String description;
 }
