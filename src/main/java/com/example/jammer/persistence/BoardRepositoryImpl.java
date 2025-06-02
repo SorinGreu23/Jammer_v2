@@ -52,6 +52,38 @@ public class BoardRepositoryImpl implements BoardRepository {
         }
     }
 
+    @Override
+    public void deleteById(Long boardId) {
+        String sql = "DELETE FROM [Workspace].[Boards] WHERE [Id] = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, boardId);
+            int affected = ps.executeUpdate();
+            if (affected == 0) {
+                throw new RuntimeException("Deleting board failed, no rows affected.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error deleting board", e);
+        }
+    }
+
+    @Override
+    public Board findById(Long boardId) {
+        String sql = "SELECT [Id], [Name], [WorkspaceId], [CreatedAt], [UpdatedAt] FROM [Workspace].[Boards] WHERE [Id] = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, boardId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding board by ID", e);
+        }
+        return null;
+    }
+
     private Board insert(Board board) {
         String sql = """
             INSERT INTO [Workspace].[Boards]
@@ -85,7 +117,7 @@ public class BoardRepositoryImpl implements BoardRepository {
         }
     }
 
-    private Board update(Board board) {
+    public Board update(Board board) {
         String sql = """
             UPDATE [Workspace].[Boards]
                SET [Name] = ?,
