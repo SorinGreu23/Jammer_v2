@@ -1,54 +1,143 @@
-<div class="login-container">
-  <div class="login-card">
-    <div class="login-header">
-      <h2>Welcome Back</h2>
-      <p>Please sign in to your account</p>
+<div class="auth-container">
+  <!-- Background Elements -->
+  <div class="bg-elements">
+    <div class="bg-circle bg-circle-1"></div>
+    <div class="bg-circle bg-circle-2"></div>
+    <div class="bg-circle bg-circle-3"></div>
+  </div>
+
+  <div class="auth-content">
+    <!-- Brand Section -->
+    <div class="brand-section">
+      <div class="logo">
+        <i class="pi pi-sitemap"></i>
+      </div>
+      <h1 class="brand-title">Jammer</h1>
+      <p class="brand-subtitle">Join the Project Management Revolution</p>
     </div>
 
-    <form [formGroup]="registerForm" (ngSubmit)="onLogin()" class="login-form">
-      <div class="field">
-        <label for="username">Username</label>
-        <input pInputText id="username" formControlName="username" placeholder="Enter your username"
-          [class.ng-invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" /> <small
-          *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" class="p-error">
-          Email is required
-        </small>
+    <!-- Auth Card -->
+    <div class="auth-card">
+      <div class="auth-header">
+        <h2>Create Your Account</h2>
+        <p>Start organizing your projects today</p>
       </div>
+      
+      <form [formGroup]="registerForm" (ngSubmit)="onLogin()" class="auth-form">
+        <div class="field">
+          <label for="username">Username</label>
+          <div class="input-wrapper">
+            <i class="pi pi-user input-icon"></i>
+            <input 
+              pInputText 
+              id="username" 
+              formControlName="username" 
+              placeholder="Choose your username"
+              [class.ng-invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched"
+            />
+          </div>
+          <small 
+            *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" 
+            class="p-error"
+          >
+            Username is required
+          </small>
+        </div>
 
-      <div class="field">
-        <label for="email">Email</label>
-        <input pInputText id="email" formControlName="email" placeholder="Enter your email"
-          [class.ng-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" /> <small
-          *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" class="p-error">
-          Email is required
-        </small>
+        <div class="field">
+          <label for="email">Email Address</label>
+          <div class="input-wrapper">
+            <i class="pi pi-envelope input-icon"></i>
+            <input 
+              pInputText 
+              id="email" 
+              formControlName="email" 
+              placeholder="Enter your email"
+              [class.ng-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+            />
+          </div>
+          <small 
+            *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" 
+            class="p-error"
+          >
+            Email is required
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrapper">
+            <i class="pi pi-lock input-icon"></i>
+            <p-password 
+              id="password" 
+              formControlName="password" 
+              placeholder="Create a strong password" 
+              [toggleMask]="true"
+              [feedback]="false" 
+              styleClass="w-full custom-password"
+            ></p-password>
+          </div>
+          <small 
+            *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" 
+            class="p-error"
+          >
+            Password is required
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="confirmPassword">Confirm Password</label>
+          <div class="password-wrapper">
+            <i class="pi pi-shield input-icon"></i>
+            <p-password 
+              id="confirmPassword" 
+              formControlName="confirmPassword" 
+              placeholder="Confirm your password"
+              [toggleMask]="true" 
+              [feedback]="false" 
+              styleClass="w-full custom-password"
+            ></p-password>
+          </div>
+          <small 
+            *ngIf="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched"
+            class="p-error"
+          >
+            Password confirmation is required
+          </small>
+        </div>
+
+        <button 
+          pButton 
+          type="submit"
+          label="Create Account"
+          icon="pi pi-user-plus"
+          class="auth-submit-btn"
+          [loading]="isLoading"
+          [disabled]="registerForm.invalid">
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <div class="divider">
+          <span>Already have an account?</span>
+        </div>
+        <button 
+          pButton 
+          type="button"
+          label="Sign In Instead" 
+          icon="pi pi-sign-in"
+          class="p-button-outlined auth-switch-btn"
+          routerLink="/login">
+        </button>
       </div>
+    </div>
 
-      <div class="field">
-        <label for="password">Password</label>
-        <p-password id="password" formControlName="password" placeholder="Enter your password" [toggleMask]="true"
-          [feedback]="false" styleClass="w-full"></p-password>
-        <small *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" class="p-error">
-          Password is required
-        </small>
-      </div>
-
-      <div class="field">
-        <label for="confirmPassword">Confirm Password</label>
-        <p-password id="confirmPassword" formControlName="confirmPassword" placeholder="Confirm your password"
-          [toggleMask]="true" [feedback]="false" styleClass="w-full"></p-password>
-        <small *ngIf="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched"
-          class="p-error">
-          Password is required
-        </small>
-      </div>
-
-      <p-button type="submit" label="Sign Up" styleClass="w-full" [loading]="isLoading"
-        [disabled]="registerForm.invalid"></p-button>
-    </form>
-
-    <div class="login-footer">
-      <p>Already have an account? <a routerLink="/login">Log in here</a></p>
+    <!-- Back to Home -->
+    <div class="back-home">
+      <a routerLink="/" class="back-link">
+        <i class="pi pi-arrow-left"></i>
+        Back to Home
+      </a>
     </div>
   </div>
 </div>

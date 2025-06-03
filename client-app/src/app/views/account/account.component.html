@@ -1,4 +1,181 @@
 <div class="account-container">
-  <h1>Account Details</h1>
-  <p>This is the account page. More content to come!</p>
+  <!-- Background Elements -->
+  <div class="bg-elements">
+    <div class="bg-circle bg-circle-1"></div>
+    <div class="bg-circle bg-circle-2"></div>
+    <div class="bg-circle bg-circle-3"></div>
+  </div>
+
+  <div class="account-content">
+    <!-- Header Section -->
+    <div class="account-header">
+      <button 
+        pButton 
+        type="button" 
+        icon="pi pi-arrow-left" 
+        class="p-button-text back-button"
+        (click)="goBackToDashboard()">
+        Back to Dashboard
+      </button>
+      
+      <div class="header-info">
+        <div class="brand-section">
+          <div class="logo">
+            <i class="pi pi-sitemap"></i>
+          </div>
+          <h1 class="brand-title">Account Settings</h1>
+          <p class="brand-subtitle">Manage your profile and preferences</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="account-main">
+      <!-- Profile Card -->
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="avatar-section">
+            <p-avatar 
+              [label]="getInitials()" 
+              size="xlarge" 
+              styleClass="custom-avatar">
+            </p-avatar>
+            <button 
+              pButton 
+              type="button" 
+              icon="pi pi-camera" 
+              class="p-button-rounded p-button-text avatar-edit-btn"
+              title="Change Avatar">
+            </button>
+          </div>
+          
+          <div class="profile-info">
+            <h2>{{ currentUser?.username || 'User' }}</h2>
+            <p class="user-email">{{ currentUser?.email || 'user@example.com' }}</p>
+            <div class="user-badges">
+              <span class="badge active-badge">Active</span>
+              <span class="badge member-badge">Member since {{ currentUser?.createdAt ? (currentUser.createdAt | date:'MMM yyyy') : 'Jan 2024' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Grid -->
+      <div class="settings-grid">
+        <!-- Profile Information -->
+        <div class="settings-card">
+          <div class="card-header">
+            <div class="header-left">
+              <i class="pi pi-user"></i>
+              <h3>Profile Information</h3>
+            </div>
+            <button 
+              pButton 
+              type="button" 
+              icon="pi pi-pencil" 
+              class="p-button-text p-button-sm edit-btn">
+            </button>
+          </div>
+          
+          <div class="card-content">
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Username</label>
+                <span>{{ currentUser?.username || 'Not set' }}</span>
+              </div>
+              <div class="info-item">
+                <label>Email</label>
+                <span>{{ currentUser?.email || 'Not set' }}</span>
+              </div>
+              <div class="info-item">
+                <label>First Name</label>
+                <span>{{ currentUser?.firstName || 'Not set' }}</span>
+              </div>
+              <div class="info-item">
+                <label>Last Name</label>
+                <span>{{ currentUser?.lastName || 'Not set' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Security -->
+        <div class="settings-card">
+          <div class="card-header">
+            <div class="header-left">
+              <i class="pi pi-shield"></i>
+              <h3>Account Security</h3>
+            </div>
+            <button 
+              pButton 
+              type="button" 
+              icon="pi pi-pencil" 
+              class="p-button-text p-button-sm edit-btn">
+            </button>
+          </div>
+          
+          <div class="card-content">
+            <div class="security-items">
+              <div class="security-item">
+                <div class="security-info">
+                  <h4>Password</h4>
+                  <p>Last changed {{ currentUser?.passwordUpdated ? (currentUser?.passwordUpdated | date:'mediumDate') : 'Never' }}</p>
+                </div>
+                <button 
+                  pButton 
+                  type="button"
+                  label="Change" 
+                  class="p-button-outlined p-button-sm">
+                </button>
+              </div>
+              
+              <div class="security-item">
+                <div class="security-info">
+                  <h4>Two-Factor Authentication</h4>
+                  <p>Add an extra layer of security</p>
+                </div>
+                <button 
+                  pButton 
+                  type="button" 
+                  label="Enable" 
+                  class="p-button-outlined p-button-sm">
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="settings-card stats-card">
+          <div class="card-header">
+            <div class="header-left">
+              <i class="pi pi-chart-bar"></i>
+              <h3>Your Statistics</h3>
+            </div>
+          </div>
+          
+          <div class="card-content">
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-number">{{ currentUser?.boardsCount || '0' }}</div>
+                <div class="stat-label">Boards Created</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">{{ currentUser?.tasksCount || '0' }}</div>
+                <div class="stat-label">Tasks Completed</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">{{ currentUser?.projectsCount || '0' }}</div>
+                <div class="stat-label">Projects</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">{{ currentUser?.collaborationsCount || '0' }}</div>
+                <div class="stat-label">Collaborations</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

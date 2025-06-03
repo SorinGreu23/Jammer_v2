@@ -1,4 +1,4 @@
-package com.example.jammer.infrastructure.repository;
+package com.example.jammer.persistence;
 
 import com.example.jammer.domain.model.Task;
 import com.example.jammer.domain.repository.TaskRepository;

@@ -7,7 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ToastModule } from 'primeng/toast';
-import { AuthService, RegisterCredentials } from '../../shared/components/auth.service';
+import { AuthService, RegisterCredentials } from '../../shared/services/auth.service';
 
 @Component({
   selector: 'app-register',

@@ -1,1 +1,405 @@
-<p>board works!</p>
+<div class="board-container" *ngIf="!loading">
+  <!-- Background Elements -->
+  <div class="bg-elements">
+    <div class="bg-circle bg-circle-1"></div>
+    <div class="bg-circle bg-circle-2"></div>
+    <div class="bg-circle bg-circle-3"></div>
+  </div>
+
+  <div class="board-content">
+    <!-- Board Header -->
+    <div class="board-header">
+      <button 
+        pButton 
+        type="button" 
+        icon="pi pi-arrow-left" 
+        class="back-button"
+        (click)="goBackToDashboard()">
+        Back to Dashboard
+      </button>
+      
+      <div class="header-info" *ngIf="board">
+        <div class="brand-section">
+          <div class="logo">
+            <i class="pi pi-sitemap"></i>
+          </div>
+          <div class="board-details">
+            <h1 class="board-title">{{ board.name }}</h1>
+            <p class="board-subtitle">
+              Created {{ board.createdAt | date:'MMM d, y' }} • {{ tasks.length }} total tasks
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Columns -->
+    <div class="task-columns" cdkDropListGroup>
+      <!-- TODO Column -->
+      <div class="task-column todo-column">
+        <div class="column-header">
+          <div class="header-content">
+            <div class="column-icon todo-icon">
+              <i class="pi pi-clock"></i>
+            </div>
+            <div class="column-info">
+              <h3>To Do</h3>
+              <span class="task-count">{{ todoTasks.length }}</span>
+            </div>
+          </div>
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-plus"
+            class="add-task-btn"
+            (click)="openCreateTaskModal()"
+            title="Add new task">
+          </button>
+        </div>
+        <div 
+          class="task-list"
+          cdkDropList
+          id="todo-list"
+          [cdkDropListData]="todoTasks"
+          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('todo'))">
+          <div 
+            class="task-card" 
+            *ngFor="let task of todoTasks"
+            cdkDrag
+            [cdkDragData]="task"
+            (cdkDragStarted)="onDragStarted($event)"
+            (cdkDragEnded)="onDragEnded($event)">
+            
+            <div class="task-header">
+              <h4>{{ task.name }}</h4>
+              <button 
+                class="edit-task-btn"
+                (click)="openEditTaskModal(task, $event)"
+                title="Edit task">
+                <i class="pi pi-pencil"></i>
+              </button>
+            </div>
+            
+            <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+            <div class="task-footer">
+              <span class="task-status todo-status">{{ task.status || 'TODO' }}</span>
+              <span class="task-date">{{ task.createdAt | date:'MMM d' }}</span>
+            </div>
+          </div>
+          
+          <div class="empty-column" *ngIf="todoTasks.length === 0">
+            <div class="empty-icon">
+              <i class="pi pi-clock"></i>
+            </div>
+            <p>No pending tasks</p>
+            <small>Create your first task to get started</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- In Progress Column -->
+      <div class="task-column progress-column">
+        <div class="column-header">
+          <div class="header-content">
+            <div class="column-icon progress-icon">
+              <i class="pi pi-play"></i>
+            </div>
+            <div class="column-info">
+              <h3>In Progress</h3>
+              <span class="task-count">{{ inProgressTasks.length }}</span>
+            </div>
+          </div>
+        </div>
+        <div 
+          class="task-list"
+          cdkDropList
+          id="progress-list"
+          [cdkDropListData]="inProgressTasks"
+          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('in-progress'))">
+          <div 
+            class="task-card" 
+            *ngFor="let task of inProgressTasks"
+            cdkDrag
+            [cdkDragData]="task"
+            (cdkDragStarted)="onDragStarted($event)"
+            (cdkDragEnded)="onDragEnded($event)">
+            
+            <div class="task-header">
+              <h4>{{ task.name }}</h4>
+              <button 
+                class="edit-task-btn"
+                (click)="openEditTaskModal(task, $event)"
+                title="Edit task">
+                <i class="pi pi-pencil"></i>
+              </button>
+            </div>
+            
+            <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+            <div class="task-footer">
+              <span class="task-status progress-status">{{ task.status }}</span>
+              <span class="task-date">{{ task.createdAt | date:'MMM d' }}</span>
+            </div>
+          </div>
+          
+          <div class="empty-column" *ngIf="inProgressTasks.length === 0">
+            <div class="empty-icon">
+              <i class="pi pi-play"></i>
+            </div>
+            <p>No tasks in progress</p>
+            <small>Drag tasks here when you start working</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testing Column -->
+      <div class="task-column testing-column">
+        <div class="column-header">
+          <div class="header-content">
+            <div class="column-icon testing-icon">
+              <i class="pi pi-cog"></i>
+            </div>
+            <div class="column-info">
+              <h3>Testing</h3>
+              <span class="task-count">{{ testingTasks.length }}</span>
+            </div>
+          </div>
+        </div>
+        <div 
+          class="task-list"
+          cdkDropList
+          id="testing-list"
+          [cdkDropListData]="testingTasks"
+          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('testing'))">
+          <div 
+            class="task-card" 
+            *ngFor="let task of testingTasks"
+            cdkDrag
+            [cdkDragData]="task"
+            (cdkDragStarted)="onDragStarted($event)"
+            (cdkDragEnded)="onDragEnded($event)">
+            
+            <div class="task-header">
+              <h4>{{ task.name }}</h4>
+              <button 
+                class="edit-task-btn"
+                (click)="openEditTaskModal(task, $event)"
+                title="Edit task">
+                <i class="pi pi-pencil"></i>
+              </button>
+            </div>
+            
+            <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+            <div class="task-footer">
+              <span class="task-status testing-status">{{ task.status }}</span>
+              <span class="task-date">{{ task.createdAt | date:'MMM d' }}</span>
+            </div>
+          </div>
+          
+          <div class="empty-column" *ngIf="testingTasks.length === 0">
+            <div class="empty-icon">
+              <i class="pi pi-cog"></i>
+            </div>
+            <p>No tasks in testing</p>
+            <small>Move completed work here for testing</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Column -->
+      <div class="task-column review-column">
+        <div class="column-header">
+          <div class="header-content">
+            <div class="column-icon review-icon">
+              <i class="pi pi-eye"></i>
+            </div>
+            <div class="column-info">
+              <h3>Review</h3>
+              <span class="task-count">{{ reviewTasks.length }}</span>
+            </div>
+          </div>
+        </div>
+        <div 
+          class="task-list"
+          cdkDropList
+          id="review-list"
+          [cdkDropListData]="reviewTasks"
+          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('review'))">
+          <div 
+            class="task-card" 
+            *ngFor="let task of reviewTasks"
+            cdkDrag
+            [cdkDragData]="task"
+            (cdkDragStarted)="onDragStarted($event)"
+            (cdkDragEnded)="onDragEnded($event)">
+            
+            <div class="task-header">
+              <h4>{{ task.name }}</h4>
+              <button 
+                class="edit-task-btn"
+                (click)="openEditTaskModal(task, $event)"
+                title="Edit task">
+                <i class="pi pi-pencil"></i>
+              </button>
+            </div>
+            
+            <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+            <div class="task-footer">
+              <span class="task-status review-status">{{ task.status }}</span>
+              <span class="task-date">{{ task.createdAt | date:'MMM d' }}</span>
+            </div>
+          </div>
+          
+          <div class="empty-column" *ngIf="reviewTasks.length === 0">
+            <div class="empty-icon">
+              <i class="pi pi-eye"></i>
+            </div>
+            <p>No tasks in review</p>
+            <small>Tasks awaiting final approval</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Done Column -->
+      <div class="task-column done-column">
+        <div class="column-header">
+          <div class="header-content">
+            <div class="column-icon done-icon">
+              <i class="pi pi-check"></i>
+            </div>
+            <div class="column-info">
+              <h3>Done</h3>
+              <span class="task-count">{{ doneTasks.length }}</span>
+            </div>
+          </div>
+        </div>
+        <div 
+          class="task-list"
+          cdkDropList
+          id="done-list"
+          [cdkDropListData]="doneTasks"
+          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('done'))">
+          <div 
+            class="task-card" 
+            *ngFor="let task of doneTasks"
+            cdkDrag
+            [cdkDragData]="task"
+            (cdkDragStarted)="onDragStarted($event)"
+            (cdkDragEnded)="onDragEnded($event)">
+            
+            <div class="task-header">
+              <h4>{{ task.name }}</h4>
+              <button 
+                class="edit-task-btn"
+                (click)="openEditTaskModal(task, $event)"
+                title="Edit task">
+                <i class="pi pi-pencil"></i>
+              </button>
+            </div>
+            
+            <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+            <div class="task-footer">
+              <span class="task-status done-status">{{ task.status }}</span>
+              <span class="task-date">{{ task.createdAt | date:'MMM d' }}</span>
+            </div>
+          </div>
+          
+          <div class="empty-column" *ngIf="doneTasks.length === 0">
+            <div class="empty-icon">
+              <i class="pi pi-check"></i>
+            </div>
+            <p>No completed tasks</p>
+            <small>Completed tasks will appear here</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-section" *ngIf="loading">
+  <div class="bg-elements">
+    <div class="bg-circle bg-circle-1"></div>
+    <div class="bg-circle bg-circle-2"></div>
+    <div class="bg-circle bg-circle-3"></div>
+  </div>
+  <div class="loading-card">
+    <div class="loading-icon">
+      <i class="pi pi-spin pi-spinner"></i>
+    </div>
+    <h3>Loading board details...</h3>
+    <p>Please wait while we fetch your board data</p>
+  </div>
+</div>
+
+<!-- Create/Edit Task Modal -->
+<p-dialog 
+  [header]="isEditMode ? 'Edit Task' : 'Create New Task'" 
+  [(visible)]="showCreateTaskModal" 
+  [modal]="true" 
+  [style]="{width: '500px'}"
+  [closable]="true"
+  [draggable]="false"
+  styleClass="custom-modal"
+  (onHide)="closeCreateTaskModal()">
+  
+  <div class="create-task-form">
+    <div class="form-field">
+      <label for="taskName">Task Name *</label>
+      <input 
+        pInputText 
+        id="taskName" 
+        type="text" 
+        [value]="newTaskName"
+        (input)="newTaskName = $any($event.target).value"
+        placeholder="Enter a descriptive task name"
+        class="form-input"
+        [disabled]="creatingTask"
+        (keyup.enter)="isEditMode ? updateTask() : createTask()">
+    </div>
+    
+    <div class="form-field">
+      <label for="taskDescription">Description (Optional)</label>
+      <textarea 
+        pInputTextarea 
+        id="taskDescription"
+        [value]="newTaskDescription"
+        (input)="newTaskDescription = $any($event.target).value"
+        placeholder="Add more details about this task..."
+        rows="4"
+        class="form-textarea"
+        [disabled]="creatingTask">
+      </textarea>
+    </div>
+    
+    <div class="form-info">
+      <div class="info-icon">
+        <i class="pi pi-info-circle"></i>
+      </div>
+      <span>{{ isEditMode ? 'Task will maintain its current column' : 'Task will be created in the TODO column' }}</span>
+    </div>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <div class="modal-footer">
+      <button 
+        pButton 
+        type="button" 
+        label="Cancel" 
+        class="cancel-btn"
+        (click)="closeCreateTaskModal()"
+        [disabled]="creatingTask">
+      </button>
+      <button 
+        pButton 
+        type="button" 
+        [label]="isEditMode ? 'Update Task' : 'Create Task'" 
+        [icon]="isEditMode ? 'pi pi-check' : 'pi pi-plus'"
+        class="create-btn"
+        (click)="isEditMode ? updateTask() : createTask()"
+        [disabled]="!newTaskName.trim() || creatingTask"
+        [loading]="creatingTask">
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

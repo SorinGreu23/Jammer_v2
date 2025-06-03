@@ -1,56 +1,102 @@
-<div class="login-container">
-  <div class="login-card">
-    <div class="login-header">
-      <h2>Welcome Back</h2>
-      <p>Please sign in to your account</p>
+<div class="auth-container">
+  <!-- Background Elements -->
+  <div class="bg-elements">
+    <div class="bg-circle bg-circle-1"></div>
+    <div class="bg-circle bg-circle-2"></div>
+    <div class="bg-circle bg-circle-3"></div>
+  </div>
+
+  <div class="auth-content">
+    <!-- Brand Section -->
+    <div class="brand-section">
+      <div class="logo">
+        <i class="pi pi-sitemap"></i>
+      </div>
+      <h1 class="brand-title">Jammer</h1>
+      <p class="brand-subtitle">Your Project Management Solution</p>
     </div>
-    
-    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form">
-      <div class="field">
-        <label for="email">Email</label>
-        <input 
-          pInputText 
-          id="email" 
-          formControlName="email"
-          placeholder="Enter your email"
-          [class.ng-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-        />        <small 
-          *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" 
-          class="p-error"
-        >
-          Email is required
-        </small>
+
+    <!-- Auth Card -->
+    <div class="auth-card">
+      <div class="auth-header">
+        <h2>Welcome Back</h2>
+        <p>Sign in to continue to your workspace</p>
       </div>
+      
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
+        <div class="field">
+          <label for="email">Email Address</label>
+          <div class="input-wrapper">
+            <i class="pi pi-envelope input-icon"></i>
+            <input 
+              pInputText 
+              id="email" 
+              formControlName="email"
+              placeholder="Enter your email"
+              [class.ng-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+            />
+          </div>
+          <small 
+            *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" 
+            class="p-error"
+          >
+            Email is required
+          </small>
+        </div>
 
-      <div class="field">
-        <label for="password">Password</label>
-        <p-password 
-          id="password"
-          formControlName="password"
-          placeholder="Enter your password"
-          [toggleMask]="true"
-          [feedback]="false"
-          styleClass="w-full"
-        ></p-password>
-        <small 
-          *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" 
-          class="p-error"
-        >
-          Password is required
-        </small>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrapper">
+            <i class="pi pi-lock input-icon"></i>
+            <p-password 
+              id="password"
+              formControlName="password"
+              placeholder="Enter your password"
+              [toggleMask]="true"
+              [feedback]="false"
+              styleClass="w-full custom-password"
+            ></p-password>
+          </div>
+          <small 
+            *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" 
+            class="p-error"
+          >
+            Password is required
+          </small>
+        </div>
+
+        <button 
+          pButton 
+          type="submit"
+          label="Sign In"
+          icon="pi pi-sign-in"
+          class="auth-submit-btn"
+          [loading]="isLoading"
+          [disabled]="loginForm.invalid">
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <div class="divider">
+          <span>New to Jammer?</span>
+        </div>
+        <button 
+          pButton 
+          type="button"
+          label="Create an Account" 
+          icon="pi pi-user-plus"
+          class="p-button-outlined auth-switch-btn"
+          routerLink="/register">
+        </button>
       </div>
+    </div>
 
-      <p-button 
-        type="submit"
-        label="Sign In"
-        styleClass="w-full"
-        [loading]="isLoading"
-        [disabled]="loginForm.invalid"
-      ></p-button>
-    </form>
-
-    <div class="login-footer">
-      <p>Don't have an account? <a routerLink="/register">Sign up here</a></p>
+    <!-- Back to Home -->
+    <div class="back-home">
+      <a routerLink="/" class="back-link">
+        <i class="pi pi-arrow-left"></i>
+        Back to Home
+      </a>
     </div>
   </div>
 </div>

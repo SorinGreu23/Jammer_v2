@@ -1,46 +1,161 @@
 <div class="dashboard-container">
-  <div class="dashboard-header">
-    <h1>{{ title }}</h1>
-    <div class="user-info" *ngIf="currentUser">
-      <span>Welcome, {{ currentUser.username }}!</span>
-    </div>
+  <!-- Background Elements -->
+  <div class="bg-elements">
+    <div class="bg-circle bg-circle-1"></div>
+    <div class="bg-circle bg-circle-2"></div>
+    <div class="bg-circle bg-circle-3"></div>
   </div>
 
-  <div class="dashboard-cards">
-    <!-- Card 1: Projects -->
-    <div class="dashboard-card projects">
-      <div class="card-content">
-        <h3>Projects</h3>
-        <div class="stat">5</div>
-        <p>Active Projects</p>
+  <div class="dashboard-content">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+      <div class="header-info">
+        <div class="brand-section">
+          <div class="logo">
+            <i class="pi pi-sitemap"></i>
+          </div>
+          <h1 class="brand-title">{{ title }}</h1>
+          <p class="brand-subtitle" *ngIf="currentUser">Welcome back, {{ currentUser.username }}!</p>
+        </div>
+      </div>
+      
+      <div class="header-actions" *ngIf="currentUser">
+        <button 
+          pButton 
+          type="button" 
+          label="Create Board" 
+          icon="pi pi-plus"
+          class="create-board-btn"
+          (click)="openCreateModal()">
+        </button>
       </div>
     </div>
 
-    <!-- Card 2: Tasks -->
-    <div class="dashboard-card tasks">
-      <div class="card-content">
-        <h3>Tasks</h3>
-        <div class="stat">12</div>
-        <p>Pending Tasks</p>
+    <!-- Main Content -->
+    <div class="dashboard-main">
+      <!-- Boards Grid -->
+      <div class="boards-section" *ngIf="!loading">
+        <div class="section-header" *ngIf="boards.length > 0">
+          <h2>Your Boards</h2>
+          <p>Manage your projects and workflows</p>
+        </div>
+        
+        <div class="boards-grid" *ngIf="boards.length > 0">
+          <div class="board-card" 
+               *ngFor="let board of boards" 
+               (click)="onBoardClick(board)">
+            <div class="card-header">
+              <h3>{{ board.name }}</h3>
+              <div class="card-icon">
+                <i class="pi pi-sitemap"></i>
+              </div>
+            </div>
+            
+            <div class="card-stats">
+              <div class="stat-item">
+                <div class="stat-number">{{ board.taskCount || 0 }}</div>
+                <div class="stat-label">Total Tasks</div>
+              </div>
+              <div class="stat-item" *ngIf="board.pendingTasks > 0">
+                <div class="stat-number pending">{{ board.pendingTasks }}</div>
+                <div class="stat-label">Pending</div>
+              </div>
+            </div>
+            
+            <div class="card-footer">
+              <div class="board-date">
+                <i class="pi pi-calendar"></i>
+                <span>{{ board.createdAt | date:'MMM d, y' }}</span>
+              </div>
+              <div class="board-status">
+                <span class="status-badge active">Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- Card 3: Team -->
-    <div class="dashboard-card team">
-      <div class="card-content">
-        <h3>Team</h3>
-        <div class="stat">8</div>
-        <p>Team Members</p>
+      <!-- Loading State -->
+      <div class="loading-section" *ngIf="loading">
+        <div class="loading-card">
+          <div class="loading-icon">
+            <i class="pi pi-spin pi-spinner"></i>
+          </div>
+          <h3>Loading your boards...</h3>
+          <p>Please wait while we fetch your data</p>
+        </div>
       </div>
-    </div>
-    
-    <!-- Card 4: Activity -->
-    <div class="dashboard-card activity">
-      <div class="card-content">
-        <h3>Activity</h3>
-        <div class="stat">24</div>
-        <p>Recent Updates</p>
+
+      <!-- Empty State -->
+      <div class="empty-section" *ngIf="!loading && boards.length === 0">
+        <div class="empty-card">
+          <div class="empty-icon">
+            <i class="pi pi-sitemap"></i>
+          </div>
+          <h3>Welcome to Jammer!</h3>
+          <p>You don't have any boards yet. Create your first board to start organizing your tasks and projects.</p>
+          <button 
+            pButton 
+            type="button" 
+            label="Create Your First Board" 
+            icon="pi pi-plus"
+            class="create-first-btn"
+            (click)="openCreateModal()">
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Create Board Modal -->
+<p-dialog 
+  header="Create New Board" 
+  [(visible)]="showCreateModal" 
+  [modal]="true" 
+  [style]="{width: '450px'}"
+  [closable]="true"
+  [draggable]="false"
+  styleClass="custom-modal"
+  (onHide)="closeCreateModal()">
+  
+  <div class="create-board-form">
+    <div class="form-field">
+      <label for="boardName">Board Name</label>
+      <input 
+        pInputText 
+        id="boardName" 
+        type="text" 
+        [value]="newBoardName"
+        (input)="newBoardName = $any($event.target).value"
+        placeholder="Enter a name for your board"
+        class="form-input"
+        [disabled]="creatingBoard"
+        (keyup.enter)="createBoard()"
+        #boardNameInput>
+    </div>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <div class="modal-footer">
+      <button 
+        pButton 
+        type="button" 
+        label="Cancel" 
+        class="cancel-btn"
+        (click)="closeCreateModal()"
+        [disabled]="creatingBoard">
+      </button>
+      <button 
+        pButton 
+        type="button" 
+        label="Create Board" 
+        icon="pi pi-check"
+        class="create-btn"
+        (click)="createBoard()"
+        [disabled]="!newBoardName.trim() || creatingBoard"
+        [loading]="creatingBoard">
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
