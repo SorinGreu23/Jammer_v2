@@ -1,0 +1,46 @@
+@import "primeicons/primeicons.css";
+
+// Global styles
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  color: white;
+  background-color: #1a1a1a;
+}
+
+// Dark mode text colors
+h1, h2, h3, h4, h5, h6, p, span, div, label {
+  color: white;
+}
+
+// PrimeNG dark theme overrides
+.p-card {
+  background-color: #2a2a2a !important;
+  color: white !important;
+  border: 1px solid #444 !important;
+}
+
+.p-card .p-card-body {
+  color: white !important;
+}
+
+.p-card .p-card-header {
+  color: white !important;
+  background-color: #2a2a2a !important;
+}
+
+.p-button {
+  background-color: #007ad9 !important;
+  border-color: #007ad9 !important;
+  color: white !important;
+}
+
+.p-button.p-button-outlined {
+  background-color: transparent !important;
+  color: #007ad9 !important;
+  border-color: #007ad9 !important;
+}

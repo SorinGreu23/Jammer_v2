@@ -1,0 +1,28 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <a routerLink="/">Jammer</a>
+    </div>
+
+    <div class="navbar-links">
+      <a routerLink="/dashboard" routerLinkActive="active">
+        <i class="pi pi-home"></i>
+        Dashboard
+      </a>
+      <a routerLink="/account" routerLinkActive="active">
+        <i class="pi pi-user"></i>
+        Account
+      </a>
+    </div>
+
+    <div class="navbar-actions">
+      <p-button 
+        *ngIf="currentUser"
+        icon="pi pi-sign-out"
+        (onClick)="onLogout()"
+        styleClass="p-button-text p-button-rounded"
+        [label]="'Logout'">
+      </p-button>
+    </div>
+  </div>
+</nav>
