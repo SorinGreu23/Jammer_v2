@@ -92,6 +92,7 @@
     .brand-section {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 1.5rem;
       
       .logo {
@@ -111,6 +112,8 @@
       }
       
       .board-details {
+        flex: 1;
+        
         .board-title {
           font-size: 2.5rem;
           font-weight: 700;
@@ -127,6 +130,47 @@
           color: rgba(255, 255, 255, 0.7);
           margin: 0;
           font-size: 1.1rem;
+        }
+      }
+      
+      .board-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        
+        .members-btn {
+          position: relative;
+          border-color: rgba(255, 255, 255, 0.3) !important;
+          color: rgba(255, 255, 255, 0.8) !important;
+          background: rgba(255, 255, 255, 0.1) !important;
+          
+          &:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            border-color: rgba(255, 255, 255, 0.5) !important;
+            color: rgba(255, 255, 255, 1) !important;
+          }
+          
+          .members-count {
+            margin-left: 0.5rem;
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            padding: 0.1rem 0.4rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+          }
+        }
+        
+        .invite-btn {
+          background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+          border: none !important;
+          color: white !important;
+          font-weight: 600 !important;
+          
+          &:hover {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+            transform: translateY(-1px) !important;
+          }
         }
       }
     }
@@ -737,6 +781,225 @@
       flex-direction: column;
       align-items: flex-start;
       gap: 0.5rem;
+    }
+  }
+}
+
+// Board collaboration modal styles
+.invite-form {
+  .form-field {
+    margin-bottom: 1.5rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.75rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      border-radius: 10px !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: rgba(255, 255, 255, 0.9) !important;
+      transition: all 0.3s ease !important;
+      font-size: 1rem !important;
+
+      &:focus {
+        border-color: #22c55e !important;
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2) !important;
+        background: rgba(255, 255, 255, 0.15) !important;
+        outline: none !important;
+      }
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important;
+      }
+    }
+  }
+}
+
+.members-list {
+  .members-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    
+    h3 {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+  }
+  
+  .member-items {
+    max-height: 400px;
+    overflow-y: auto;
+    
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 2px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+  
+  .member-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    &.pending {
+      opacity: 0.7;
+    }
+    
+    .member-avatar {
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      
+      .pi {
+        color: white;
+        font-size: 1.2rem;
+      }
+    }
+    
+    .member-info {
+      flex: 1;
+      
+      h4 {
+        margin: 0 0 0.25rem;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1rem;
+        font-weight: 600;
+      }
+      
+      p {
+        margin: 0 0 0.5rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+      }
+      
+      .member-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        
+        .status-badge {
+          padding: 0.2rem 0.6rem;
+          border-radius: 8px;
+          font-size: 0.7rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          
+          &.status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+          }
+          
+          &.status-accepted {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+          }
+          
+          &.status-rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+          }
+        }
+        
+        .role-badge {
+          background: rgba(139, 92, 246, 0.2);
+          color: #a78bfa;
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          padding: 0.2rem 0.6rem;
+          border-radius: 8px;
+          font-size: 0.7rem;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          
+          .pi {
+            font-size: 0.6rem;
+          }
+        }
+        
+        .join-date, .invite-date {
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 0.75rem;
+        }
+      }
+    }
+    
+    .member-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  }
+  
+  .empty-members {
+    text-align: center;
+    padding: 2rem;
+    color: rgba(255, 255, 255, 0.5);
+    
+    .empty-icon {
+      margin-bottom: 1rem;
+      
+      .pi {
+        font-size: 2.5rem;
+        color: rgba(255, 255, 255, 0.3);
+      }
+    }
+    
+    p {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    small {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.4);
     }
   }
 }

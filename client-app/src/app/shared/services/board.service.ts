@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Board } from '../models/board.model';
 import { Task } from '../models/task.model';
+import { BoardMember, InviteUserRequest, InviteUserResponse } from '../models/board-member.model';
 
 export interface CreateBoardRequest {
   name: string;
@@ -107,6 +108,23 @@ export class BoardService {
   ): Observable<TaskResponse> {
     return this.http.put<TaskResponse>(
       `${this.API_URL}/tasks/${taskId}`,
+      request,
+      {
+        withCredentials: true,
+      }
+    );
+  }
+
+  // Board collaboration methods
+  getBoardMembers(boardId: number): Observable<BoardMember[]> {
+    return this.http.get<BoardMember[]>(`${this.API_URL}/boards/${boardId}/members`, {
+      withCredentials: true,
+    });
+  }
+
+  inviteUserToBoard(boardId: number, request: InviteUserRequest): Observable<InviteUserResponse> {
+    return this.http.post<InviteUserResponse>(
+      `${this.API_URL}/boards/${boardId}/invite`,
       request,
       {
         withCredentials: true,

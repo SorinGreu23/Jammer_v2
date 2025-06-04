@@ -31,6 +31,30 @@
           </div>
         </div>
       </div>
+
+      <!-- Board Actions -->
+      <div class="board-actions" *ngIf="board">
+        <button 
+          pButton 
+          type="button" 
+          icon="pi pi-users"
+          label="Members"
+          class="p-button-outlined members-btn"
+          (click)="showMembersModal()"
+          title="View board members">
+          <span class="members-count">{{ boardMembers.length }}</span>
+        </button>
+        
+        <button 
+          pButton 
+          type="button" 
+          icon="pi pi-user-plus"
+          label="Invite"
+          class="invite-btn"
+          (click)="showInviteModal()"
+          title="Invite members to board">
+        </button>
+      </div>
     </div>
 
     <!-- Task Columns -->
@@ -151,6 +175,60 @@
         </div>
       </div>
 
+      <!-- Review Column -->
+      <div class="task-column review-column">
+        <div class="column-header">
+          <div class="header-content">
+            <div class="column-icon review-icon">
+              <i class="pi pi-eye"></i>
+            </div>
+            <div class="column-info">
+              <h3>Review</h3>
+              <span class="task-count">{{ reviewTasks.length }}</span>
+            </div>
+          </div>
+        </div>
+        <div 
+          class="task-list"
+          cdkDropList
+          id="review-list"
+          [cdkDropListData]="reviewTasks"
+          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('review'))">
+          <div 
+            class="task-card" 
+            *ngFor="let task of reviewTasks"
+            cdkDrag
+            [cdkDragData]="task"
+            (cdkDragStarted)="onDragStarted($event)"
+            (cdkDragEnded)="onDragEnded($event)">
+            
+            <div class="task-header">
+              <h4>{{ task.name }}</h4>
+              <button 
+                class="edit-task-btn"
+                (click)="openEditTaskModal(task, $event)"
+                title="Edit task">
+                <i class="pi pi-pencil"></i>
+              </button>
+            </div>
+            
+            <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+            <div class="task-footer">
+              <span class="task-status review-status">{{ task.status }}</span>
+              <span class="task-date">{{ task.createdAt | date:'MMM d' }}</span>
+            </div>
+          </div>
+          
+          <div class="empty-column" *ngIf="reviewTasks.length === 0">
+            <div class="empty-icon">
+              <i class="pi pi-eye"></i>
+            </div>
+            <p>No tasks in review</p>
+            <small>Tasks awaiting final approval</small>
+          </div>
+        </div>
+      </div>
+
       <!-- Testing Column -->
       <div class="task-column testing-column">
         <div class="column-header">
@@ -205,59 +283,7 @@
         </div>
       </div>
 
-      <!-- Review Column -->
-      <div class="task-column review-column">
-        <div class="column-header">
-          <div class="header-content">
-            <div class="column-icon review-icon">
-              <i class="pi pi-eye"></i>
-            </div>
-            <div class="column-info">
-              <h3>Review</h3>
-              <span class="task-count">{{ reviewTasks.length }}</span>
-            </div>
-          </div>
-        </div>
-        <div 
-          class="task-list"
-          cdkDropList
-          id="review-list"
-          [cdkDropListData]="reviewTasks"
-          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('review'))">
-          <div 
-            class="task-card" 
-            *ngFor="let task of reviewTasks"
-            cdkDrag
-            [cdkDragData]="task"
-            (cdkDragStarted)="onDragStarted($event)"
-            (cdkDragEnded)="onDragEnded($event)">
-            
-            <div class="task-header">
-              <h4>{{ task.name }}</h4>
-              <button 
-                class="edit-task-btn"
-                (click)="openEditTaskModal(task, $event)"
-                title="Edit task">
-                <i class="pi pi-pencil"></i>
-              </button>
-            </div>
-            
-            <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
-            <div class="task-footer">
-              <span class="task-status review-status">{{ task.status }}</span>
-              <span class="task-date">{{ task.createdAt | date:'MMM d' }}</span>
-            </div>
-          </div>
-          
-          <div class="empty-column" *ngIf="reviewTasks.length === 0">
-            <div class="empty-icon">
-              <i class="pi pi-eye"></i>
-            </div>
-            <p>No tasks in review</p>
-            <small>Tasks awaiting final approval</small>
-          </div>
-        </div>
-      </div>
+      
 
       <!-- Done Column -->
       <div class="task-column done-column">
@@ -403,3 +429,149 @@
     </div>
   </ng-template>
 </p-dialog>
+
+<!-- Invite Member Modal -->
+<p-dialog 
+  header="Invite Member to Board" 
+  [(visible)]="showInviteModalVisible" 
+  [modal]="true" 
+  [style]="{width: '500px'}"
+  [closable]="true"
+  [draggable]="false"
+  styleClass="custom-modal"
+  (onHide)="closeInviteModal()">
+  
+  <div class="invite-form">
+    <div class="form-field">
+      <label for="usernameOrEmail">Username or Email *</label>
+      <input 
+        pInputText 
+        id="usernameOrEmail" 
+        type="text" 
+        [(ngModel)]="inviteUsernameOrEmail"
+        placeholder="Enter username or email address"
+        class="form-input"
+        [disabled]="invitingUser"
+        (keyup.enter)="inviteUser()">
+    </div>
+    
+    <div class="form-info">
+      <div class="info-icon">
+        <i class="pi pi-info-circle"></i>
+      </div>
+      <span>If the user is registered, they'll receive an instant invitation. Otherwise, we'll send them an email invite.</span>
+    </div>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <div class="modal-footer">
+      <button 
+        pButton 
+        type="button" 
+        label="Cancel" 
+        class="cancel-btn"
+        (click)="closeInviteModal()"
+        [disabled]="invitingUser">
+      </button>
+      <button 
+        pButton 
+        type="button" 
+        label="Send Invite" 
+        icon="pi pi-send"
+        class="create-btn"
+        (click)="inviteUser()"
+        [disabled]="!inviteUsernameOrEmail.trim() || invitingUser"
+        [loading]="invitingUser">
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Board Members Modal -->
+<p-dialog 
+  header="Board Members" 
+  [(visible)]="showMembersModalVisible" 
+  [modal]="true" 
+  [style]="{width: '700px'}"
+  [closable]="true"
+  [draggable]="false"
+  styleClass="custom-modal"
+  (onHide)="closeMembersModal()">
+  
+  <div class="members-list">
+    <div class="members-header">
+      <h3>{{ boardMembers.length }} Members</h3>
+      <button 
+        pButton 
+        type="button" 
+        icon="pi pi-user-plus"
+        label="Invite More"
+        class="p-button-outlined"
+        (click)="showInviteModal()">
+      </button>
+    </div>
+    
+    <div class="member-items">
+      <div 
+        class="member-item" 
+        *ngFor="let member of boardMembers"
+        [class.pending]="member.status === 'PENDING'">
+        
+        <div class="member-avatar">
+          <i class="pi pi-user"></i>
+        </div>
+        
+        <div class="member-info">
+          <h4>{{ member.firstName && member.lastName ? (member.firstName + ' ' + member.lastName) : member.username }}</h4>
+          <p>{{ member.email }}</p>
+          <div class="member-meta">
+            <span class="status-badge" [class]="'status-' + member.status.toLowerCase()">
+              {{ member.status }}
+            </span>
+            <span class="role-badge" *ngIf="member.isAdmin">
+              <i class="pi pi-crown"></i> Admin
+            </span>
+            <span class="join-date" *ngIf="member.joinedAt">
+              Joined {{ member.joinedAt | date:'MMM d, y' }}
+            </span>
+            <span class="invite-date" *ngIf="!member.joinedAt">
+              Invited {{ member.invitedAt | date:'MMM d, y' }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="member-actions" *ngIf="member.status === 'ACCEPTED'">
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-cog"
+            class="p-button-text p-button-sm"
+            title="Member settings">
+          </button>
+        </div>
+      </div>
+      
+      <div class="empty-members" *ngIf="boardMembers.length === 0">
+        <div class="empty-icon">
+          <i class="pi pi-users"></i>
+        </div>
+        <p>No members yet</p>
+        <small>Invite team members to collaborate on this board</small>
+      </div>
+    </div>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <div class="modal-footer">
+      <button 
+        pButton 
+        type="button" 
+        label="Close" 
+        class="cancel-btn"
+        (click)="closeMembersModal()">
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>

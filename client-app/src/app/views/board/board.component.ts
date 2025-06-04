@@ -1,21 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { BoardService, CreateTaskRequest, UpdateTaskRequest } from '../../shared/services/board.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { Board } from '../../shared/models/board.model';
 import { Task } from '../../shared/models/task.model';
+import { BoardMember, InviteUserRequest } from '../../shared/models/board-member.model';
 
 @Component({
   selector: 'app-board',
   standalone: true,
-  imports: [CommonModule, ButtonModule, CardModule, DialogModule, InputTextModule, InputTextarea, DragDropModule],
+  imports: [CommonModule, FormsModule, ButtonModule, CardModule, DialogModule, InputTextModule, InputTextarea, ToastModule, DragDropModule],
+  providers: [MessageService],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss'
 })
@@ -44,11 +49,19 @@ export class BoardComponent implements OnInit {
   // Drag and drop tracking
   updatingTaskStatus = false;
 
+  // Board collaboration properties
+  boardMembers: BoardMember[] = [];
+  showInviteModalVisible = false;
+  showMembersModalVisible = false;
+  inviteUsernameOrEmail = '';
+  invitingUser = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private boardService: BoardService,
-    private authService: AuthService
+    private authService: AuthService,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -75,6 +88,7 @@ export class BoardComponent implements OnInit {
           
           if (this.board) {
             this.loadTasks();
+            this.loadBoardMembers();
           } else {
             console.error('Board not found or access denied');
             this.router.navigate(['/dashboard']);
@@ -99,6 +113,22 @@ export class BoardComponent implements OnInit {
       error: (error) => {
         console.error('Error loading tasks:', error);
         this.loading = false;
+      }
+    });
+  }
+
+  loadBoardMembers(): void {
+    this.boardService.getBoardMembers(this.boardId).subscribe({
+      next: (members: BoardMember[]) => {
+        this.boardMembers = members;
+      },
+      error: (error) => {
+        console.error('Error loading board members:', error);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error', 
+          detail: 'Failed to load board members' 
+        });
       }
     });
   }
@@ -311,5 +341,62 @@ export class BoardComponent implements OnInit {
       case 'done': return 'DONE';
       default: return 'TODO';
     }
+  }
+
+  // Board collaboration methods
+  showInviteModal(): void {
+    this.showInviteModalVisible = true;
+    this.inviteUsernameOrEmail = '';
+  }
+
+  closeInviteModal(): void {
+    this.showInviteModalVisible = false;
+    this.inviteUsernameOrEmail = '';
+    this.invitingUser = false;
+  }
+
+  showMembersModal(): void {
+    this.showMembersModalVisible = true;
+    this.loadBoardMembers(); // Refresh members list
+  }
+
+  closeMembersModal(): void {
+    this.showMembersModalVisible = false;
+  }
+
+  inviteUser(): void {
+    if (!this.inviteUsernameOrEmail.trim()) {
+      return;
+    }
+
+    this.invitingUser = true;
+
+    const request: InviteUserRequest = {
+      usernameOrEmail: this.inviteUsernameOrEmail.trim(),
+      boardId: this.boardId
+    };
+
+    this.boardService.inviteUserToBoard(this.boardId, request).subscribe({
+      next: (response) => {
+        console.log('✅ User invited successfully:', response);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Invitation Sent',
+          detail: response.message
+        });
+        
+        this.closeInviteModal();
+        this.loadBoardMembers(); // Refresh members list
+      },
+      error: (error) => {
+        console.error('❌ Error inviting user:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Invitation Failed',
+          detail: error.error?.message || 'Failed to send invitation'
+        });
+        this.invitingUser = false;
+      }
+    });
   }
 }

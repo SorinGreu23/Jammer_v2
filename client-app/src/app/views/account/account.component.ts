@@ -22,7 +22,6 @@ import {
     RouterModule,
     ButtonModule,
     InputTextModule,
-    InputTextarea,
     AvatarModule,
     CardModule,
     FormsModule,
