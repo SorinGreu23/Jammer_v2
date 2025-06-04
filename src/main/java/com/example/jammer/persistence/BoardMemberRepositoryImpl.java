@@ -3,7 +3,10 @@ package com.example.jammer.persistence;
 import com.example.jammer.domain.model.BoardMember;
 import com.example.jammer.domain.repository.BoardMemberRepository;
 import com.example.jammer.api.dtos.board.InviteUserResponse;
+import com.example.jammer.infrastructure.email.EmailService;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -14,9 +17,13 @@ import java.util.UUID;
 @Repository
 public class BoardMemberRepositoryImpl implements BoardMemberRepository {
     private final DataSource dataSource;
+    private final JdbcTemplate jdbcTemplate;
+    private final EmailService emailService;
 
-    public BoardMemberRepositoryImpl(DataSource dataSource) {
+    public BoardMemberRepositoryImpl(DataSource dataSource, JdbcTemplate jdbcTemplate, EmailService emailService) {
         this.dataSource = dataSource;
+        this.jdbcTemplate = jdbcTemplate;
+        this.emailService = emailService;
     }
 
     @Override
@@ -56,6 +63,7 @@ public class BoardMemberRepositoryImpl implements BoardMemberRepository {
     }
 
     @Override
+    @Transactional
     public InviteUserResponse inviteUserToBoard(String usernameOrEmail, Integer boardId, Integer invitedBy) {
         String invitationToken = UUID.randomUUID().toString();
         String sql = "EXEC [Workspace].[InviteUserToBoard] ?, ?, ?, ?";
@@ -74,6 +82,19 @@ public class BoardMemberRepositoryImpl implements BoardMemberRepository {
                     Integer userId = rs.getObject("UserId") != null ? rs.getInt("UserId") : null;
                     String email = rs.getString("Email");
                     
+                    // If it's an email invitation, send the invitation email
+                    if ("EMAIL_INVITATION".equals(invitationType)) {
+                        // Get board name for the email
+                        String boardName = jdbcTemplate.queryForObject(
+                            "SELECT [Name] FROM [Workspace].[Boards] WHERE [Id] = ?",
+                            String.class,
+                            boardId
+                        );
+                        
+                        // Send invitation email
+                        emailService.sendBoardInvitation(email, boardName, invitationToken);
+                    }
+                    
                     String message = invitationType.equals("USER_FOUND") 
                         ? "User has been invited to the board" 
                         : "Invitation email has been sent";
@@ -89,7 +110,7 @@ public class BoardMemberRepositoryImpl implements BoardMemberRepository {
     }
 
     @Override
-    public void acceptBoardInvitation(String invitationToken, Integer userId) {
+    public Integer acceptBoardInvitation(String invitationToken, Integer userId) {
         String sql = "EXEC [Workspace].[AcceptBoardInvitation] ?, ?";
         
         try (Connection conn = dataSource.getConnection();
@@ -102,6 +123,8 @@ public class BoardMemberRepositoryImpl implements BoardMemberRepository {
                 if (!rs.next()) {
                     throw new RuntimeException("Failed to accept invitation");
                 }
+                
+                return rs.getInt("BoardId");
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error accepting board invitation: " + e.getMessage(), e);

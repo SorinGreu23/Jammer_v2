@@ -27,7 +27,7 @@ export interface AuthResponse {
 })
 export class AuthService {
   private readonly API_URL = 'http://localhost:8080/api';
-  private currentUserSubject = new BehaviorSubject<any>(null);
+  private currentUserSubject = new BehaviorSubject<AuthResponse | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient, private router: Router) {
@@ -37,7 +37,7 @@ export class AuthService {
       this.currentUserSubject.next(JSON.parse(storedUser));
     }
   }
-  
+
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.API_URL}/users/login`, credentials, {
@@ -45,7 +45,6 @@ export class AuthService {
       })
       .pipe(
         tap((response) => {
-          // Store user data (backend returns user data directly, not nested)
           localStorage.setItem('currentUser', JSON.stringify(response));
           this.currentUserSubject.next(response);
         })
@@ -70,12 +69,20 @@ export class AuthService {
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
   }
-  
+
   isLoggedIn(): boolean {
     return !!localStorage.getItem('currentUser');
   }
 
-  getCurrentUser(): any {
+  getCurrentUser(): AuthResponse | null {
     return this.currentUserSubject.value;
+  }
+
+  getCurrentUserId(): number {
+    const user = this.getCurrentUser();
+    if (!user) {
+      throw new Error('No user is currently logged in');
+    }
+    return user.userId;
   }
 }

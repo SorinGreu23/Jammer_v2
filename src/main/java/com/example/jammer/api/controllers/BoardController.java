@@ -4,6 +4,8 @@ import com.example.jammer.api.dtos.board.CreateBoardRequest;
 import com.example.jammer.api.dtos.board.CreateBoardResponse;
 import com.example.jammer.api.dtos.board.InviteUserRequest;
 import com.example.jammer.api.dtos.board.InviteUserResponse;
+import com.example.jammer.api.dtos.board.AcceptInvitationRequest;
+import com.example.jammer.api.dtos.board.AcceptInvitationResponse;
 import com.example.jammer.application.board.CreateBoardUseCase;
 import com.example.jammer.application.board.GetBoardsByUserUseCase;
 import com.example.jammer.application.board.UpdateBoardUseCase;
@@ -11,6 +13,7 @@ import com.example.jammer.application.board.DeleteBoardUseCase;
 import com.example.jammer.application.board.GetBoardStatisticsUseCase;
 import com.example.jammer.application.board.InviteUserToBoardUseCase;
 import com.example.jammer.application.board.GetBoardMembersUseCase;
+import com.example.jammer.application.board.AcceptBoardInvitationUseCase;
 import com.example.jammer.domain.model.Board;
 import com.example.jammer.domain.model.BoardMember;
 import com.example.jammer.api.dtos.board.BoardStatisticsResponse;
@@ -31,6 +34,7 @@ public class BoardController {
     private final GetBoardStatisticsUseCase getBoardStatisticsUseCase;
     private final InviteUserToBoardUseCase inviteUserToBoardUseCase;
     private final GetBoardMembersUseCase getBoardMembersUseCase;
+    private final AcceptBoardInvitationUseCase acceptBoardInvitationUseCase;
 
     public BoardController(
             CreateBoardUseCase createBoardUseCase,
@@ -39,7 +43,8 @@ public class BoardController {
             DeleteBoardUseCase deleteBoardUseCase,
             GetBoardStatisticsUseCase getBoardStatisticsUseCase,
             InviteUserToBoardUseCase inviteUserToBoardUseCase,
-            GetBoardMembersUseCase getBoardMembersUseCase
+            GetBoardMembersUseCase getBoardMembersUseCase,
+            AcceptBoardInvitationUseCase acceptBoardInvitationUseCase
     ) {
         this.createBoardUseCase = createBoardUseCase;
         this.getBoardsByUserUseCase = getBoardsByUserUseCase;
@@ -48,6 +53,7 @@ public class BoardController {
         this.getBoardStatisticsUseCase = getBoardStatisticsUseCase;
         this.inviteUserToBoardUseCase = inviteUserToBoardUseCase;
         this.getBoardMembersUseCase = getBoardMembersUseCase;
+        this.acceptBoardInvitationUseCase = acceptBoardInvitationUseCase;
     }
 
     @DeleteMapping("/{boardId}")
@@ -70,14 +76,26 @@ public class BoardController {
 
     @GetMapping("/user/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<Board> getBoardsByUserId(@PathVariable int userId) {
-        return getBoardsByUserUseCase.execute(userId);
+    public ResponseEntity<List<Board>> getBoardsByUserId(
+            @PathVariable int userId,
+            @RequestHeader("X-User-Id") Integer xUserId) {
+        // Verify that the requesting user is the same as the target user
+        if (userId != xUserId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(getBoardsByUserUseCase.execute(userId));
     }
 
     @GetMapping("/user/{userId}/statistics")
     @ResponseStatus(HttpStatus.OK)
-    public List<BoardStatisticsResponse> getBoardStatistics(@PathVariable int userId) {
-        return getBoardStatisticsUseCase.execute(userId);
+    public ResponseEntity<List<BoardStatisticsResponse>> getBoardStatistics(
+            @PathVariable int userId,
+            @RequestHeader("X-User-Id") Integer xUserId) {
+        // Verify that the requesting user is the same as the target user
+        if (userId != xUserId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(getBoardStatisticsUseCase.execute(userId));
     }
 
     // Board collaboration endpoints
@@ -95,5 +113,13 @@ public class BoardController {
     @ResponseStatus(HttpStatus.OK)
     public List<BoardMember> getBoardMembers(@PathVariable Integer boardId) {
         return getBoardMembersUseCase.execute(boardId);
+    }
+
+    @PostMapping("/join")
+    @ResponseStatus(HttpStatus.OK)
+    public AcceptInvitationResponse acceptBoardInvitation(
+            @RequestBody AcceptInvitationRequest request,
+            @RequestHeader("X-User-Id") Integer userId) {
+        return acceptBoardInvitationUseCase.execute(request.getToken(), userId);
     }
 }

@@ -55,6 +55,18 @@
               </div>
             </div>
 
+            <div
+              class="workspace-info"
+              [class.shared-workspace]="!board.isOwnWorkspace"
+            >
+              <i
+                class="pi"
+                [class.pi-folder]="board.isOwnWorkspace"
+                [class.pi-share-alt]="!board.isOwnWorkspace"
+              ></i>
+              <span>{{ board.workspaceName }}</span>
+            </div>
+
             <div class="card-stats">
               <div class="stat-item">
                 <div class="stat-number">{{ board.taskCount || 0 }}</div>

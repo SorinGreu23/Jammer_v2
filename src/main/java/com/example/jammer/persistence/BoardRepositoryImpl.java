@@ -22,10 +22,12 @@ public class BoardRepositoryImpl implements BoardRepository {
     @Override
     public List<Board> findByUserId(int userId) {
         String sql = """
-            SELECT b.[Id], b.[Name], b.[WorkspaceId], b.[CreatedAt], b.[UpdatedAt]
-              FROM [Workspace].[Boards] b
-             INNER JOIN [Workspace].[Workspaces] w ON b.[WorkspaceId] = w.[Id]
-             WHERE w.[UserId] = ?
+            SELECT DISTINCT b.[Id], b.[Name], b.[WorkspaceId], b.[CreatedAt], b.[UpdatedAt]
+            FROM [Workspace].[Boards] b
+            LEFT JOIN [Workspace].[Workspaces] w ON b.[WorkspaceId] = w.[Id]
+            LEFT JOIN [Workspace].[BoardMembers] bm ON b.[Id] = bm.[BoardId]
+            WHERE w.[UserId] = ? 
+               OR (bm.[UserId] = ? AND bm.[Status] = 'ACCEPTED')
             """;
 
         List<Board> boards = new ArrayList<>();
@@ -33,6 +35,7 @@ public class BoardRepositoryImpl implements BoardRepository {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, userId);
+            ps.setInt(2, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     boards.add(mapRow(rs));

@@ -8,7 +8,7 @@ import java.util.List;
 public interface BoardMemberRepository {
     List<BoardMember> getBoardMembers(Integer boardId);
     InviteUserResponse inviteUserToBoard(String usernameOrEmail, Integer boardId, Integer invitedBy);
-    void acceptBoardInvitation(String invitationToken, Integer userId);
+    Integer acceptBoardInvitation(String invitationToken, Integer userId);
     boolean isUserBoardMember(Integer userId, Integer boardId);
     boolean isUserBoardAdmin(Integer userId, Integer boardId);
     void removeBoardMember(Integer userId, Integer boardId);

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class UserController {
 
     private final CreateUserUseCase createUserUseCase;
@@ -47,7 +48,14 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/statistics")
-    public ResponseEntity<UserResponse> getUserStatistics(@PathVariable int userId) {
+    public ResponseEntity<UserResponse> getUserStatistics(
+            @PathVariable int userId,
+            @RequestHeader("X-User-Id") Integer xUserId) {
+        // Verify that the requesting user is the same as the target user
+        if (userId != xUserId) {
+            return ResponseEntity.status(403).build();
+        }
+
         var userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -56,21 +64,22 @@ public class UserController {
 
         var stats = getBoardStatisticsUseCase.execute(userId);
         var response = new UserResponse(
-            user.getId(),
-            user.getUsername(),
-            user.getEmail(),
-            user.getFirstName(),
-            user.getLastName(),
-            user.getCreatedAt().toString()
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getCreatedAt().toString()
         );
 
-        // Calculate statistics using the stored procedure results
         response.setBoardsCount(stats.size());
         response.setTasksCount(stats.stream()
-            .mapToInt(s -> s.getCompletedTasks())
-            .sum());
-        response.setProjectsCount(stats.size()); // Each board represents a project
-        response.setCollaborationsCount(1); // Placeholder for now
+                .mapToInt(s -> s.getTotalTasks())
+                .sum());
+        response.setProjectsCount(stats.size());
+        response.setCollaborationsCount(stats.stream()
+                .mapToInt(s -> s.getTotalTasks() > 0 ? 1 : 0)
+                .sum());
 
         return ResponseEntity.ok(response);
     }

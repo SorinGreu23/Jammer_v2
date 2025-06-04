@@ -10,15 +10,20 @@ import {
   CreateBoardRequest,
   BoardStatistics,
 } from '../../shared/services/board.service';
+import { WorkspaceService } from '../../shared/services/workspace.service';
 import { Board } from '../../shared/models/board.model';
+import { Workspace } from '../../shared/models/workspace.model';
 import { Task } from '../../shared/models/task.model';
 import { forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-export interface BoardWithTasks extends Board {
+export interface BoardWithDetails extends Board {
   taskCount: number;
   pendingTasks: number;
   completedTasks: number;
   completionPercentage: number;
+  workspaceName: string;
+  isOwnWorkspace: boolean;
 }
 
 @Component({
@@ -33,7 +38,8 @@ export class DashboardComponent implements OnInit {
   currentUser: any;
   currentDate = new Date();
 
-  boards: BoardWithTasks[] = [];
+  boards: BoardWithDetails[] = [];
+  workspaces: { [key: number]: Workspace } = {};
   loading = true;
 
   // Modal properties
@@ -44,17 +50,18 @@ export class DashboardComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private boardService: BoardService,
+    private workspaceService: WorkspaceService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
     if (this.currentUser) {
-      this.loadBoards();
+      this.loadBoardsAndWorkspaces();
     }
   }
 
-  loadBoards(): void {
+  loadBoardsAndWorkspaces(): void {
     this.loading = true;
 
     if (!this.currentUser?.userId) {
@@ -62,13 +69,19 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    // Get both boards and their statistics
+    // Get boards, statistics, and workspace
     forkJoin({
       boards: this.boardService.getBoardsByUserId(this.currentUser.userId),
       stats: this.boardService.getBoardStatistics(this.currentUser.userId),
+      workspace: this.workspaceService.getWorkspaceByUserId(
+        this.currentUser.userId
+      ),
     }).subscribe({
-      next: ({ boards, stats }) => {
-        // Merge board info with statistics
+      next: ({ boards, stats, workspace }) => {
+        // Store workspace
+        this.workspaces[workspace.id] = workspace;
+
+        // Merge board info with statistics and workspace
         this.boards = boards.map((board) => {
           const boardStats = stats.find((s) => s.boardId === board.id) || {
             totalTasks: 0,
@@ -76,25 +89,39 @@ export class DashboardComponent implements OnInit {
             completionPercentage: 0,
           };
 
+          const isOwnWorkspace = board.workspaceId === workspace.id;
+          const workspaceName = isOwnWorkspace
+            ? 'My Workspace'
+            : 'Shared Board';
+
           return {
             ...board,
             taskCount: boardStats.totalTasks,
             pendingTasks: boardStats.totalTasks - boardStats.completedTasks,
             completedTasks: boardStats.completedTasks,
             completionPercentage: boardStats.completionPercentage,
+            workspaceName,
+            isOwnWorkspace,
           };
         });
+
+        // Sort boards: own workspace first, then shared boards
+        this.boards.sort((a, b) => {
+          if (a.isOwnWorkspace && !b.isOwnWorkspace) return -1;
+          if (!a.isOwnWorkspace && b.isOwnWorkspace) return 1;
+          return 0;
+        });
+
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error loading boards:', error);
+        console.error('Error loading boards and workspaces:', error);
         this.loading = false;
       },
     });
   }
 
-  onBoardClick(board: BoardWithTasks): void {
-    // Navigate to board detail view
+  onBoardClick(board: BoardWithDetails): void {
     this.router.navigate(['/board', board.id]);
   }
 
@@ -127,12 +154,11 @@ export class DashboardComponent implements OnInit {
         console.log('Board created successfully:', response);
         this.closeCreateModal();
         // Refresh the boards list
-        this.loadBoards();
+        this.loadBoardsAndWorkspaces();
       },
       error: (error) => {
         console.error('Error creating board:', error);
         this.creatingBoard = false;
-        // You could add a toast notification here for better UX
       },
     });
   }

@@ -1,9 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Board } from '../models/board.model';
 import { Task } from '../models/task.model';
-import { BoardMember, InviteUserRequest, InviteUserResponse } from '../models/board-member.model';
+import {
+  BoardMember,
+  InviteUserRequest,
+  InviteUserResponse,
+} from '../models/board-member.model';
+import { AuthService } from './auth.service';
 
 export interface CreateBoardRequest {
   name: string;
@@ -50,16 +55,28 @@ export interface BoardStatistics {
   completionPercentage: number;
 }
 
+export interface AcceptInvitationResponse {
+  boardId: number;
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class BoardService {
   private readonly API_URL = 'http://localhost:8080/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
+
+  private getHeaders(): HttpHeaders {
+    return new HttpHeaders({
+      'X-User-Id': this.authService.getCurrentUserId().toString(),
+    });
+  }
 
   getBoardsByUserId(userId: number): Observable<Board[]> {
     return this.http.get<Board[]>(`${this.API_URL}/boards/user/${userId}`, {
+      headers: this.getHeaders(),
       withCredentials: true,
     });
   }
@@ -68,6 +85,7 @@ export class BoardService {
     return this.http.get<BoardStatistics[]>(
       `${this.API_URL}/boards/user/${userId}/statistics`,
       {
+        headers: this.getHeaders(),
         withCredentials: true,
       }
     );
@@ -75,6 +93,7 @@ export class BoardService {
 
   getTasksByBoardId(boardId: number): Observable<Task[]> {
     return this.http.get<Task[]>(`${this.API_URL}/boards/${boardId}/tasks`, {
+      headers: this.getHeaders(),
       withCredentials: true,
     });
   }
@@ -84,6 +103,7 @@ export class BoardService {
       `${this.API_URL}/boards`,
       request,
       {
+        headers: this.getHeaders(),
         withCredentials: true,
       }
     );
@@ -97,6 +117,7 @@ export class BoardService {
       `${this.API_URL}/boards/${boardId}/tasks`,
       request,
       {
+        headers: this.getHeaders(),
         withCredentials: true,
       }
     );
@@ -110,6 +131,7 @@ export class BoardService {
       `${this.API_URL}/tasks/${taskId}`,
       request,
       {
+        headers: this.getHeaders(),
         withCredentials: true,
       }
     );
@@ -117,16 +139,39 @@ export class BoardService {
 
   // Board collaboration methods
   getBoardMembers(boardId: number): Observable<BoardMember[]> {
-    return this.http.get<BoardMember[]>(`${this.API_URL}/boards/${boardId}/members`, {
-      withCredentials: true,
-    });
+    return this.http.get<BoardMember[]>(
+      `${this.API_URL}/boards/${boardId}/members`,
+      {
+        headers: this.getHeaders(),
+        withCredentials: true,
+      }
+    );
   }
 
-  inviteUserToBoard(boardId: number, request: InviteUserRequest): Observable<InviteUserResponse> {
+  inviteUserToBoard(
+    boardId: number,
+    request: InviteUserRequest
+  ): Observable<InviteUserResponse> {
+    const payload = {
+      usernameOrEmail: request.usernameOrEmail,
+    };
+
     return this.http.post<InviteUserResponse>(
       `${this.API_URL}/boards/${boardId}/invite`,
-      request,
+      payload,
       {
+        headers: this.getHeaders(),
+        withCredentials: true,
+      }
+    );
+  }
+
+  acceptBoardInvitation(token: string): Observable<AcceptInvitationResponse> {
+    return this.http.post<AcceptInvitationResponse>(
+      `${this.API_URL}/boards/join`,
+      { token },
+      {
+        headers: this.getHeaders(),
         withCredentials: true,
       }
     );
