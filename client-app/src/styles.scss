@@ -1,5 +1,16 @@
 @import "primeicons/primeicons.css";
 
+// Minimal CDK styles - let CDK handle everything else
+.cdk-drag {
+  cursor: grab !important;
+}
+
+.cdk-drag:active {
+  cursor: grabbing !important;
+}
+
+// Remove all our custom overrides - let CDK work naturally
+
 // Global styles
 * {
   box-sizing: border-box;

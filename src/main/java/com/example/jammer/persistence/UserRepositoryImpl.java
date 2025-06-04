@@ -60,7 +60,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Optional<User> findById(int id) {
         String sql = """
-            SELECT [Id], [Username], [Email], [PasswordHash], [CreatedAt]
+            SELECT [Id], [Username], [Email], [PasswordHash], [FirstName], [LastName], [CreatedAt]
               FROM [Workspace].[Users]
              WHERE [Id] = ?
             """;
@@ -82,7 +82,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Optional<User> findByEmail(String email) {
         String sql = """
-            SELECT [Id], [Username], [Email], [PasswordHash], [CreatedAt]
+            SELECT [Id], [Username], [Email], [PasswordHash], [FirstName], [LastName], [CreatedAt]
               FROM [Workspace].[Users]
              WHERE [Email] = ?
             """;
@@ -110,11 +110,33 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
+    @Override
+    public User findByUsername(String username) {
+        String sql = """
+            SELECT [Id], [Username], [Email], [PasswordHash], [FirstName], [LastName], [CreatedAt]
+              FROM [Workspace].[Users]
+             WHERE [Username] = ?
+            """;
+        try (Connection conn = connectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error loading user by username", e);
+        }
+    }
+
     private User insert(User user) {
         String sql = """
             INSERT INTO [Workspace].[Users]
-                ([Username], [Email], [PasswordHash], [CreatedAt])
-            VALUES (?, ?, ?, ?)
+                ([Username], [Email], [PasswordHash], [FirstName], [LastName], [CreatedAt])
+            VALUES (?, ?, ?, ?, ?, ?)
             """;
         try (Connection conn = connectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -122,7 +144,9 @@ public class UserRepositoryImpl implements UserRepository {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPasswordHash());
-            ps.setDate(4, (user.getCreatedAt() != null
+            ps.setString(4, user.getFirstName());
+            ps.setString(5, user.getLastName());
+            ps.setDate(6, (user.getCreatedAt() != null
                     ? (Date) user.getCreatedAt()
                     : Date.valueOf(LocalDate.now())));
 
@@ -150,7 +174,9 @@ public class UserRepositoryImpl implements UserRepository {
             UPDATE [Workspace].[Users]
                SET [Username]     = ?,
                    [Email]        = ?,
-                   [PasswordHash] = ?
+                   [PasswordHash] = ?,
+                   [FirstName]    = ?,
+                   [LastName]     = ?
              WHERE [Id]           = ?
             """;
         try (Connection conn = connectionFactory.getConnection();
@@ -159,7 +185,9 @@ public class UserRepositoryImpl implements UserRepository {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPasswordHash());
-            ps.setInt(4, user.getId());
+            ps.setString(4, user.getFirstName());
+            ps.setString(5, user.getLastName());
+            ps.setInt(6, user.getId());
 
             int affected = ps.executeUpdate();
             if (affected == 0) {
@@ -177,6 +205,8 @@ public class UserRepositoryImpl implements UserRepository {
                 rs.getString("Username"),
                 rs.getString("Email"),
                 rs.getString("PasswordHash"),
+                rs.getString("FirstName"),
+                rs.getString("LastName"),
                 rs.getDate("CreatedAt")
         );
     }

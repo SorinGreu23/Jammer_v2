@@ -1,1 +1,66 @@
-<p>homepage works!</p>
+<div class="homepage-container">
+  <div class="hero-section">
+    <div class="hero-content">
+      <!-- Logo/Brand -->
+      <div class="brand-section">
+        <div class="logo">
+          <i class="pi pi-sitemap"></i>
+        </div>
+        <h1 class="brand-title">Jammer</h1>
+      </div>
+
+      <!-- Hero Text -->
+      <div class="hero-text">
+        <h2 class="hero-headline">Organize Your Projects Like a Pro</h2>
+        <p class="hero-description">
+          A powerful Kanban board tool to manage your tasks, collaborate with your team, 
+          and bring your projects to life. Simple, intuitive, and designed for productivity.
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="cta-section">
+        <button 
+          pButton 
+          type="button" 
+          label="Get Started" 
+          icon="pi pi-user-plus"
+          class="p-button-lg cta-primary"
+          (click)="navigateToRegister()">
+        </button>
+        
+        <button 
+          pButton 
+          type="button" 
+          label="Sign In" 
+          icon="pi pi-sign-in"
+          class="p-button-lg p-button-outlined cta-secondary"
+          (click)="navigateToLogin()">
+        </button>
+      </div>
+
+      <!-- Features -->
+      <div class="features-preview">
+        <div class="feature-item">
+          <i class="pi pi-check-circle"></i>
+          <span>Drag & Drop Tasks</span>
+        </div>
+        <div class="feature-item">
+          <i class="pi pi-users"></i>
+          <span>Team Collaboration</span>
+        </div>
+        <div class="feature-item">
+          <i class="pi pi-chart-line"></i>
+          <span>Progress Tracking</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Background Elements -->
+    <div class="bg-elements">
+      <div class="bg-circle bg-circle-1"></div>
+      <div class="bg-circle bg-circle-2"></div>
+      <div class="bg-circle bg-circle-3"></div>
+    </div>
+  </div>
+</div>

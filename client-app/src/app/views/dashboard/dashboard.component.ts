@@ -1,24 +1,166 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { AuthService } from '../../shared/components/auth.service';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { Router } from '@angular/router';
+import { AuthService } from '../../shared/services/auth.service';
+import {
+  BoardService,
+  CreateBoardRequest,
+  BoardStatistics,
+} from '../../shared/services/board.service';
+import { WorkspaceService } from '../../shared/services/workspace.service';
+import { Board } from '../../shared/models/board.model';
+import { Workspace } from '../../shared/models/workspace.model';
+import { Task } from '../../shared/models/task.model';
+import { forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+export interface BoardWithDetails extends Board {
+  taskCount: number;
+  pendingTasks: number;
+  completedTasks: number;
+  completionPercentage: number;
+  workspaceName: string;
+  isOwnWorkspace: boolean;
+}
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ButtonModule],
+  imports: [CommonModule, ButtonModule, DialogModule, InputTextModule],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
   title = 'Dashboard - Jammer';
   currentUser: any;
-  currentDate = new Date(); // Add currentDate property
+  currentDate = new Date();
 
-  constructor(private authService: AuthService) {}
+  boards: BoardWithDetails[] = [];
+  workspaces: { [key: number]: Workspace } = {};
+  loading = true;
+
+  // Modal properties
+  showCreateModal = false;
+  newBoardName = '';
+  creatingBoard = false;
+
+  constructor(
+    private authService: AuthService,
+    private boardService: BoardService,
+    private workspaceService: WorkspaceService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
+    if (this.currentUser) {
+      this.loadBoardsAndWorkspaces();
+    }
+  }
+
+  loadBoardsAndWorkspaces(): void {
+    this.loading = true;
+
+    if (!this.currentUser?.userId) {
+      this.loading = false;
+      return;
+    }
+
+    // Get boards, statistics, and workspace
+    forkJoin({
+      boards: this.boardService.getBoardsByUserId(this.currentUser.userId),
+      stats: this.boardService.getBoardStatistics(this.currentUser.userId),
+      workspace: this.workspaceService.getWorkspaceByUserId(
+        this.currentUser.userId
+      ),
+    }).subscribe({
+      next: ({ boards, stats, workspace }) => {
+        // Store workspace
+        this.workspaces[workspace.id] = workspace;
+
+        // Merge board info with statistics and workspace
+        this.boards = boards.map((board) => {
+          const boardStats = stats.find((s) => s.boardId === board.id) || {
+            totalTasks: 0,
+            completedTasks: 0,
+            completionPercentage: 0,
+          };
+
+          const isOwnWorkspace = board.workspaceId === workspace.id;
+          const workspaceName = isOwnWorkspace
+            ? 'My Workspace'
+            : 'Shared Board';
+
+          return {
+            ...board,
+            taskCount: boardStats.totalTasks,
+            pendingTasks: boardStats.totalTasks - boardStats.completedTasks,
+            completedTasks: boardStats.completedTasks,
+            completionPercentage: boardStats.completionPercentage,
+            workspaceName,
+            isOwnWorkspace,
+          };
+        });
+
+        // Sort boards: own workspace first, then shared boards
+        this.boards.sort((a, b) => {
+          if (a.isOwnWorkspace && !b.isOwnWorkspace) return -1;
+          if (!a.isOwnWorkspace && b.isOwnWorkspace) return 1;
+          return 0;
+        });
+
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading boards and workspaces:', error);
+        this.loading = false;
+      },
+    });
+  }
+
+  onBoardClick(board: BoardWithDetails): void {
+    this.router.navigate(['/board', board.id]);
+  }
+
+  // Modal methods
+  openCreateModal(): void {
+    this.showCreateModal = true;
+    this.newBoardName = '';
+  }
+
+  closeCreateModal(): void {
+    this.showCreateModal = false;
+    this.newBoardName = '';
+    this.creatingBoard = false;
+  }
+
+  createBoard(): void {
+    if (!this.newBoardName.trim()) {
+      return;
+    }
+
+    this.creatingBoard = true;
+
+    const request: CreateBoardRequest = {
+      name: this.newBoardName.trim(),
+      userId: this.currentUser.userId,
+    };
+
+    this.boardService.createBoard(request).subscribe({
+      next: (response) => {
+        console.log('Board created successfully:', response);
+        this.closeCreateModal();
+        // Refresh the boards list
+        this.loadBoardsAndWorkspaces();
+      },
+      error: (error) => {
+        console.error('Error creating board:', error);
+        this.creatingBoard = false;
+      },
+    });
   }
 
   onLogout(): void {
