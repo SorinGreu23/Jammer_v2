@@ -71,6 +71,9 @@ export class BoardComponent implements OnInit {
   // Drag and drop tracking
   updatingTaskStatus = false;
 
+  // Task deletion tracking
+  deletingTaskId: number | null = null;
+
   // Board collaboration properties
   boardMembers: BoardMember[] = [];
   showInviteModalVisible = false;
@@ -235,10 +238,11 @@ export class BoardComponent implements OnInit {
     }
 
     this.creatingTask = true;
+    const taskName = this.newTaskName.trim(); // Capture task name before modal closes
 
     const request: CreateTaskRequest = {
       boardId: this.boardId,
-      name: this.newTaskName.trim(),
+      name: taskName,
       description: this.newTaskDescription.trim() || undefined,
       status: 'TODO',
       userId: this.currentUser.userId,
@@ -250,9 +254,34 @@ export class BoardComponent implements OnInit {
         this.closeCreateTaskModal();
         // Refresh the tasks list
         this.loadTasks();
+        
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Task Created',
+          detail: `Task "${taskName}" has been created`,
+        });
       },
       error: (error: any) => {
         console.error('❌ Error creating task:', error);
+        
+        // Extract meaningful error message from server response
+        let errorMessage = 'Failed to create task. Please try again.';
+        let summary = 'Create Failed';
+        
+        if (error?.error?.message) {
+          errorMessage = error.error.message;
+          
+          if (error.status === 400) {
+            summary = 'Invalid Task Data';
+          }
+        }
+        
+        this.messageService.add({
+          severity: 'error',
+          summary: summary,
+          detail: errorMessage,
+        });
+        
         this.creatingTask = false;
       },
     });
@@ -264,9 +293,10 @@ export class BoardComponent implements OnInit {
     }
 
     this.creatingTask = true;
+    const taskName = this.newTaskName.trim(); // Capture task name before modal closes
 
     const request: UpdateTaskRequest = {
-      name: this.newTaskName.trim(),
+      name: taskName,
       description: this.newTaskDescription.trim() || undefined,
       status: this.editingTask.status,
     };
@@ -276,17 +306,120 @@ export class BoardComponent implements OnInit {
         console.log('✅ Task updated successfully:', response);
 
         // Update the task in local arrays
-        this.editingTask!.name = this.newTaskName.trim();
+        this.editingTask!.name = taskName;
         this.editingTask!.description =
           this.newTaskDescription.trim() || undefined;
 
         this.closeCreateTaskModal();
+        
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Task Updated',
+          detail: `Task "${taskName}" has been updated`,
+        });
       },
       error: (error: any) => {
         console.error('❌ Error updating task:', error);
+        
+        // Extract meaningful error message from server response
+        let errorMessage = 'Failed to update task. Please try again.';
+        let summary = 'Update Failed';
+        
+        if (error?.error?.message) {
+          errorMessage = error.error.message;
+          
+          if (error.status === 404) {
+            summary = 'Task Not Found';
+            errorMessage = 'The task could not be found. It may have been deleted.';
+          } else if (error.status === 400) {
+            summary = 'Invalid Task Data';
+          }
+        }
+        
+        this.messageService.add({
+          severity: 'error',
+          summary: summary,
+          detail: errorMessage,
+        });
+        
         this.creatingTask = false;
       },
     });
+  }
+
+  deleteTask(task: Task, event: Event): void {
+    // Prevent drag from starting when clicking delete button
+    event.stopPropagation();
+
+    // Only allow deletion of non-done tasks (client-side check)
+    if (task.status && task.status.toUpperCase() === 'DONE') {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Cannot Delete',
+        detail: 'Completed tasks cannot be deleted',
+      });
+      return;
+    }
+
+    if (this.deletingTaskId === task.id) {
+      return; // Already deleting this task
+    }
+
+    this.deletingTaskId = task.id;
+
+    this.boardService.deleteTask(task.id).subscribe({
+      next: () => {
+        console.log('✅ Task deleted successfully:', task.name);
+        
+        // Remove task from local arrays
+        this.tasks = this.tasks.filter(t => t.id !== task.id);
+        this.categorizeTasks();
+        
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Task Deleted',
+          detail: `Task "${task.name}" has been deleted`,
+        });
+        
+        this.deletingTaskId = null;
+      },
+      error: (error: any) => {
+        console.error('❌ Error deleting task:', error);
+        
+        // Extract meaningful error message from server response
+        let errorMessage = 'Failed to delete task. Please try again.';
+        let severity = 'error';
+        let summary = 'Delete Failed';
+        
+        if (error?.error?.message) {
+          errorMessage = error.error.message;
+          
+          // Customize message based on error type
+          if (error.status === 404) {
+            summary = 'Task Not Found';
+            errorMessage = 'The task could not be found. It may have already been deleted.';
+          } else if (error.status === 403) {
+            summary = 'Delete Not Allowed';
+            severity = 'warn';
+          } else if (error.status === 400) {
+            summary = 'Invalid Request';
+            severity = 'warn';
+          }
+        }
+        
+        this.messageService.add({
+          severity: severity as any,
+          summary: summary,
+          detail: errorMessage,
+        });
+        
+        this.deletingTaskId = null;
+      },
+    });
+  }
+
+  isTaskDeletable(task: Task): boolean {
+    return !task.status || task.status.toUpperCase() !== 'DONE';
   }
 
   // Drag and drop methods

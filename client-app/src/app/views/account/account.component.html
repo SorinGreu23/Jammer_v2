@@ -161,59 +161,6 @@
           </div>
         </div>
 
-        <!-- Account Security -->
-        <div class="settings-card">
-          <div class="card-header">
-            <div class="header-left">
-              <i class="pi pi-shield"></i>
-              <h3>Account Security</h3>
-            </div>
-            <button
-              pButton
-              type="button"
-              icon="pi pi-pencil"
-              class="p-button-text p-button-sm edit-btn"
-            ></button>
-          </div>
-
-          <div class="card-content">
-            <div class="security-items">
-              <div class="security-item">
-                <div class="security-info">
-                  <h4>Password</h4>
-                  <p>
-                    Last changed
-                    {{
-                      currentUser?.passwordUpdated
-                        ? (currentUser?.passwordUpdated | date : "mediumDate")
-                        : "Never"
-                    }}
-                  </p>
-                </div>
-                <button
-                  pButton
-                  type="button"
-                  label="Change"
-                  class="p-button-outlined p-button-sm"
-                ></button>
-              </div>
-
-              <div class="security-item">
-                <div class="security-info">
-                  <h4>Two-Factor Authentication</h4>
-                  <p>Add an extra layer of security</p>
-                </div>
-                <button
-                  pButton
-                  type="button"
-                  label="Enable"
-                  class="p-button-outlined p-button-sm"
-                ></button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Statistics -->
         <div class="settings-card stats-card">
           <div class="card-header">
@@ -239,15 +186,15 @@
               </div>
               <div class="stat-item">
                 <div class="stat-number">
-                  {{ userStats?.projectsCount || "0" }}
+                  {{ userStats?.boardsSharedWithMe || "0" }}
                 </div>
-                <div class="stat-label">Projects</div>
+                <div class="stat-label">Boards Shared With Me</div>
               </div>
               <div class="stat-item">
                 <div class="stat-number">
-                  {{ userStats?.collaborationsCount || "0" }}
+                  {{ userStats?.boardsSharedByMe || "0" }}
                 </div>
-                <div class="stat-label">Collaborations</div>
+                <div class="stat-label">Boards Shared By Me</div>
               </div>
             </div>
             <div *ngIf="loading" class="loading-stats">

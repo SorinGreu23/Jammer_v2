@@ -210,6 +210,12 @@
 
 // PrimeNG Password Component Styles
 ::ng-deep .custom-password {
+  width: 100% !important;
+  
+  .p-password {
+    width: 100% !important;
+  }
+  
   .p-password-input {
     width: 100% !important;
     padding: 0.9rem 3.5rem 0.9rem 2.8rem !important;

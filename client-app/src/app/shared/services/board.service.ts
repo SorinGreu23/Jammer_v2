@@ -137,6 +137,13 @@ export class BoardService {
     );
   }
 
+  deleteTask(taskId: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/tasks/${taskId}`, {
+      headers: this.getHeaders(),
+      withCredentials: true,
+    });
+  }
+
   // Board collaboration methods
   getBoardMembers(boardId: number): Observable<BoardMember[]> {
     return this.http.get<BoardMember[]>(

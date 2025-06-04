@@ -12,4 +12,7 @@ public interface BoardRepository {
     Board update(Board board);
     Board findById(Long boardId);
     List<BoardStatisticsResponse> getBoardStatistics(int userId);
+    int countBoardsSharedWithUser(int userId);
+    int countBoardsSharedByUser(int userId);
+    int countBoardsOwnedByUser(int userId);
 }

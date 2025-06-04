@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { AuthService } from './auth.service';
 
 export interface UserStatistics {
   userId: number;
@@ -11,8 +12,8 @@ export interface UserStatistics {
   createdAt: string;
   boardsCount: number;
   tasksCount: number;
-  projectsCount: number;
-  collaborationsCount: number;
+  boardsSharedWithMe: number;
+  boardsSharedByMe: number;
 }
 
 export interface UpdateUserProfileRequest {
@@ -26,12 +27,19 @@ export interface UpdateUserProfileRequest {
 export class UserService {
   private readonly API_URL = 'http://localhost:8080/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
+
+  private getHeaders(): HttpHeaders {
+    return new HttpHeaders({
+      'X-User-Id': this.authService.getCurrentUserId().toString(),
+    });
+  }
 
   getUserStatistics(userId: number): Observable<UserStatistics> {
     return this.http.get<UserStatistics>(
       `${this.API_URL}/users/${userId}/statistics`,
       {
+        headers: this.getHeaders(),
         withCredentials: true,
       }
     );
@@ -45,6 +53,7 @@ export class UserService {
       `${this.API_URL}/users/${userId}/profile`,
       request,
       {
+        headers: this.getHeaders(),
         withCredentials: true,
       }
     );

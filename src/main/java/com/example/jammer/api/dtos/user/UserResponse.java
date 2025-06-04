@@ -14,8 +14,8 @@ public class UserResponse {
     private String createdAt;
     private Integer boardsCount;
     private Integer tasksCount;
-    private Integer projectsCount;
-    private Integer collaborationsCount;
+    private Integer boardsSharedWithMe;
+    private Integer boardsSharedByMe;
 
     public UserResponse(Integer userId, String username, String email, String firstName, String lastName, String createdAt) {
         this.userId = userId;
@@ -26,7 +26,7 @@ public class UserResponse {
         this.createdAt = createdAt;
         this.boardsCount = 0;
         this.tasksCount = 0;
-        this.projectsCount = 0;
-        this.collaborationsCount = 0;
+        this.boardsSharedWithMe = 0;
+        this.boardsSharedByMe = 0;
     }
 } 

@@ -25,7 +25,6 @@ public class InviteUserToBoardUseCase {
 
         // Check if inviter has permission (board owner or admin)
         // For now, we'll allow any authenticated user to invite
-        // You can add more sophisticated permission checking here
 
         return boardMemberRepository.inviteUserToBoard(
             request.getUsernameOrEmail(), 

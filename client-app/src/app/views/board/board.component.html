@@ -29,31 +29,31 @@
               Created {{ board.createdAt | date:'MMM d, y' }} • {{ tasks.length }} total tasks
             </p>
           </div>
+          
+          <!-- Board Actions -->
+          <div class="board-actions">
+            <button 
+              pButton 
+              type="button" 
+              icon="pi pi-users"
+              label="Members"
+              class="p-button-outlined members-btn"
+              (click)="showMembersModal()"
+              title="View board members">
+              <span class="members-count">{{ boardMembers.length }}</span>
+            </button>
+            
+            <button 
+              pButton 
+              type="button" 
+              icon="pi pi-user-plus"
+              label="Invite"
+              class="invite-btn"
+              (click)="showInviteModal()"
+              title="Invite members to board">
+            </button>
+          </div>
         </div>
-      </div>
-
-      <!-- Board Actions -->
-      <div class="board-actions" *ngIf="board">
-        <button 
-          pButton 
-          type="button" 
-          icon="pi pi-users"
-          label="Members"
-          class="p-button-outlined members-btn"
-          (click)="showMembersModal()"
-          title="View board members">
-          <span class="members-count">{{ boardMembers.length }}</span>
-        </button>
-        
-        <button 
-          pButton 
-          type="button" 
-          icon="pi pi-user-plus"
-          label="Invite"
-          class="invite-btn"
-          (click)="showInviteModal()"
-          title="Invite members to board">
-        </button>
       </div>
     </div>
 
@@ -96,12 +96,23 @@
             
             <div class="task-header">
               <h4>{{ task.name }}</h4>
-              <button 
-                class="edit-task-btn"
-                (click)="openEditTaskModal(task, $event)"
-                title="Edit task">
-                <i class="pi pi-pencil"></i>
-              </button>
+              <div class="task-actions">
+                <button 
+                  class="edit-task-btn"
+                  (click)="openEditTaskModal(task, $event)"
+                  title="Edit task">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button 
+                  *ngIf="isTaskDeletable(task)"
+                  class="delete-task-btn"
+                  (click)="deleteTask(task, $event)"
+                  [disabled]="deletingTaskId === task.id"
+                  title="Delete task">
+                  <i class="pi pi-trash" *ngIf="deletingTaskId !== task.id"></i>
+                  <i class="pi pi-spin pi-spinner" *ngIf="deletingTaskId === task.id"></i>
+                </button>
+              </div>
             </div>
             
             <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
@@ -150,12 +161,23 @@
             
             <div class="task-header">
               <h4>{{ task.name }}</h4>
-              <button 
-                class="edit-task-btn"
-                (click)="openEditTaskModal(task, $event)"
-                title="Edit task">
-                <i class="pi pi-pencil"></i>
-              </button>
+              <div class="task-actions">
+                <button 
+                  class="edit-task-btn"
+                  (click)="openEditTaskModal(task, $event)"
+                  title="Edit task">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button 
+                  *ngIf="isTaskDeletable(task)"
+                  class="delete-task-btn"
+                  (click)="deleteTask(task, $event)"
+                  [disabled]="deletingTaskId === task.id"
+                  title="Delete task">
+                  <i class="pi pi-trash" *ngIf="deletingTaskId !== task.id"></i>
+                  <i class="pi pi-spin pi-spinner" *ngIf="deletingTaskId === task.id"></i>
+                </button>
+              </div>
             </div>
             
             <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
@@ -204,12 +226,23 @@
             
             <div class="task-header">
               <h4>{{ task.name }}</h4>
-              <button 
-                class="edit-task-btn"
-                (click)="openEditTaskModal(task, $event)"
-                title="Edit task">
-                <i class="pi pi-pencil"></i>
-              </button>
+              <div class="task-actions">
+                <button 
+                  class="edit-task-btn"
+                  (click)="openEditTaskModal(task, $event)"
+                  title="Edit task">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button 
+                  *ngIf="isTaskDeletable(task)"
+                  class="delete-task-btn"
+                  (click)="deleteTask(task, $event)"
+                  [disabled]="deletingTaskId === task.id"
+                  title="Delete task">
+                  <i class="pi pi-trash" *ngIf="deletingTaskId !== task.id"></i>
+                  <i class="pi pi-spin pi-spinner" *ngIf="deletingTaskId === task.id"></i>
+                </button>
+              </div>
             </div>
             
             <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
@@ -258,12 +291,23 @@
             
             <div class="task-header">
               <h4>{{ task.name }}</h4>
-              <button 
-                class="edit-task-btn"
-                (click)="openEditTaskModal(task, $event)"
-                title="Edit task">
-                <i class="pi pi-pencil"></i>
-              </button>
+              <div class="task-actions">
+                <button 
+                  class="edit-task-btn"
+                  (click)="openEditTaskModal(task, $event)"
+                  title="Edit task">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button 
+                  *ngIf="isTaskDeletable(task)"
+                  class="delete-task-btn"
+                  (click)="deleteTask(task, $event)"
+                  [disabled]="deletingTaskId === task.id"
+                  title="Delete task">
+                  <i class="pi pi-trash" *ngIf="deletingTaskId !== task.id"></i>
+                  <i class="pi pi-spin pi-spinner" *ngIf="deletingTaskId === task.id"></i>
+                </button>
+              </div>
             </div>
             
             <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
@@ -314,12 +358,23 @@
             
             <div class="task-header">
               <h4>{{ task.name }}</h4>
-              <button 
-                class="edit-task-btn"
-                (click)="openEditTaskModal(task, $event)"
-                title="Edit task">
-                <i class="pi pi-pencil"></i>
-              </button>
+              <div class="task-actions">
+                <button 
+                  class="edit-task-btn"
+                  (click)="openEditTaskModal(task, $event)"
+                  title="Edit task">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button 
+                  *ngIf="isTaskDeletable(task)"
+                  class="delete-task-btn"
+                  (click)="deleteTask(task, $event)"
+                  [disabled]="deletingTaskId === task.id"
+                  title="Delete task">
+                  <i class="pi pi-trash" *ngIf="deletingTaskId !== task.id"></i>
+                  <i class="pi pi-spin pi-spinner" *ngIf="deletingTaskId === task.id"></i>
+                </button>
+              </div>
             </div>
             
             <p *ngIf="task.description" class="task-description">{{ task.description }}</p>

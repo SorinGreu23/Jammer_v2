@@ -10,6 +10,7 @@ import com.example.jammer.application.user.CreateUserUseCase;
 import com.example.jammer.application.user.LoginUserUseCase;
 import com.example.jammer.application.board.GetBoardStatisticsUseCase;
 import com.example.jammer.domain.repository.UserRepository;
+import com.example.jammer.domain.repository.BoardRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,16 +24,19 @@ public class UserController {
     private final LoginUserUseCase loginUserUseCase;
     private final UserRepository userRepository;
     private final GetBoardStatisticsUseCase getBoardStatisticsUseCase;
+    private final BoardRepository boardRepository;
 
     public UserController(
             CreateUserUseCase createUserUseCase,
             LoginUserUseCase loginUserUseCase,
             UserRepository userRepository,
-            GetBoardStatisticsUseCase getBoardStatisticsUseCase) {
+            GetBoardStatisticsUseCase getBoardStatisticsUseCase,
+            BoardRepository boardRepository) {
         this.createUserUseCase = createUserUseCase;
         this.loginUserUseCase = loginUserUseCase;
         this.userRepository = userRepository;
         this.getBoardStatisticsUseCase = getBoardStatisticsUseCase;
+        this.boardRepository = boardRepository;
     }
 
     @PostMapping("/register")
@@ -72,14 +76,12 @@ public class UserController {
                 user.getCreatedAt().toString()
         );
 
-        response.setBoardsCount(stats.size());
+        response.setBoardsCount(boardRepository.countBoardsOwnedByUser(userId));
         response.setTasksCount(stats.stream()
                 .mapToInt(s -> s.getTotalTasks())
                 .sum());
-        response.setProjectsCount(stats.size());
-        response.setCollaborationsCount(stats.stream()
-                .mapToInt(s -> s.getTotalTasks() > 0 ? 1 : 0)
-                .sum());
+        response.setBoardsSharedWithMe(boardRepository.countBoardsSharedWithUser(userId));
+        response.setBoardsSharedByMe(boardRepository.countBoardsSharedByUser(userId));
 
         return ResponseEntity.ok(response);
     }

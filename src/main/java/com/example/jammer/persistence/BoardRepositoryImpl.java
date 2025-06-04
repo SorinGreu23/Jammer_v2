@@ -97,32 +97,97 @@ public class BoardRepositoryImpl implements BoardRepository {
              CallableStatement cs = conn.prepareCall(sql)) {
             
             cs.setInt(1, userId);
-            boolean hasResults = cs.execute();
-            
-            // Skip the first result set (debug information)
-            if (hasResults) {
-                cs.getResultSet().close();
-                hasResults = cs.getMoreResults();
-            }
-            
-            // Process the second result set (actual statistics)
-            if (hasResults) {
-                try (ResultSet rs = cs.getResultSet()) {
-                    while (rs.next()) {
-                        statistics.add(new BoardStatisticsResponse(
-                                rs.getInt("BoardId"),
-                                rs.getString("BoardName"),
-                                rs.getInt("TotalTasks"),
-                                rs.getInt("CompletedTasks"),
-                                rs.getDouble("CompletionPercentage")
-                        ));
-                    }
+            try (ResultSet rs = cs.executeQuery()) {
+                while (rs.next()) {
+                    statistics.add(new BoardStatisticsResponse(
+                            rs.getInt("BoardId"),
+                            rs.getString("BoardName"),
+                            rs.getInt("TotalTasks"),
+                            rs.getInt("CompletedTasks"),
+                            rs.getDouble("CompletionPercentage")
+                    ));
                 }
             }
             return statistics;
         } catch (SQLException e) {
             throw new RuntimeException("Error getting board statistics", e);
         }
+    }
+
+    @Override
+    public int countBoardsSharedWithUser(int userId) {
+        String sql = """
+            SELECT COUNT(DISTINCT b.[Id])
+            FROM [Workspace].[Boards] b
+            LEFT JOIN [Workspace].[BoardMembers] bm ON b.[Id] = bm.[BoardId] AND bm.[UserId] = ? AND bm.[Status] = 'ACCEPTED'
+            LEFT JOIN [Workspace].[Workspaces] userWorkspace ON userWorkspace.[UserId] = ?
+            WHERE bm.[UserId] IS NOT NULL 
+            AND b.[WorkspaceId] != userWorkspace.[Id]
+            """;
+        
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            ps.setInt(2, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error counting boards shared with user", e);
+        }
+        return 0;
+    }
+
+    @Override
+    public int countBoardsSharedByUser(int userId) {
+        String sql = """
+            SELECT COUNT(DISTINCT b.[Id])
+            FROM [Workspace].[Boards] b
+            INNER JOIN [Workspace].[Workspaces] w ON b.[WorkspaceId] = w.[Id] AND w.[UserId] = ?
+            INNER JOIN [Workspace].[BoardMembers] bm ON b.[Id] = bm.[BoardId] AND bm.[UserId] != ? AND bm.[Status] = 'ACCEPTED'
+            """;
+        
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            ps.setInt(2, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error counting boards shared by user", e);
+        }
+        return 0;
+    }
+
+    @Override
+    public int countBoardsOwnedByUser(int userId) {
+        String sql = """
+            SELECT COUNT(b.[Id])
+            FROM [Workspace].[Boards] b
+            INNER JOIN [Workspace].[Workspaces] w ON b.[WorkspaceId] = w.[Id]
+            WHERE w.[UserId] = ?
+            """;
+        
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error counting boards owned by user", e);
+        }
+        return 0;
     }
 
     private Board insert(Board board) {
