@@ -6,9 +6,8 @@ DECLARE @SchemaName NVARCHAR(100) = 'Workspace'
 DECLARE @Output NVARCHAR(MAX) = ''
 DECLARE @TableName NVARCHAR(128)
 DECLARE @ColumnList NVARCHAR(MAX)
-DECLARE @InsertStmt NVARCHAR(MAX)
 DECLARE @SQL NVARCHAR(MAX)
-DECLARE @Columns NVARCHAR(MAX)
+DECLARE @TempOutput NVARCHAR(MAX)
 
 -- Header
 SET @Output = '-- Generated Database Backup Script' + CHAR(13) + CHAR(10)
@@ -50,34 +49,54 @@ BEGIN
     SET @Output = @Output + 'CREATE TABLE [' + @SchemaName + '].[' + @TableName + '] (' + CHAR(13) + CHAR(10)
     SET @Output = @Output + '    [Id] INT IDENTITY(1,1) NOT NULL,' + CHAR(13) + CHAR(10)
     
-    -- Columns
-    SELECT @Output = @Output + 
-        STRING_AGG(
-            CAST(
-                '    [' + c.name + '] ' + 
-                CASE WHEN c.is_computed = 1 
-                    THEN 'AS ' + OBJECT_DEFINITION(c.[object_id], c.column_id)
-                    ELSE 
-                        tp.name + 
-                        CASE 
-                            WHEN tp.name IN ('varchar', 'nvarchar', 'char', 'nchar') 
-                                THEN '(' + CASE WHEN c.max_length = -1 THEN 'MAX' ELSE CAST(c.max_length AS VARCHAR(10)) END + ')'
-                            WHEN tp.name IN ('decimal', 'numeric') 
-                                THEN '(' + CAST(c.[precision] AS VARCHAR(10)) + ',' + CAST(c.scale AS VARCHAR(10)) + ')'
-                            ELSE ''
-                        END +
-                        CASE WHEN c.is_nullable = 1 THEN ' NULL' ELSE ' NOT NULL' END +
-                        CASE WHEN dc.definition IS NOT NULL THEN ' DEFAULT ' + dc.definition ELSE '' END
-                END
-                AS NVARCHAR(MAX)
-            ),
-            ',' + CHAR(13) + CHAR(10)
-        )
+    -- Build column definitions using cursor
+    SET @TempOutput = ''
+    DECLARE @ColumnDef NVARCHAR(MAX)
+    DECLARE @FirstColumn BIT = 1
+    
+    DECLARE ColumnDefCursor CURSOR FOR
+    SELECT 
+        '    [' + c.name + '] ' + 
+        CASE WHEN c.is_computed = 1 
+            THEN 'AS ' + OBJECT_DEFINITION(c.[object_id], c.column_id)
+            ELSE 
+                tp.name + 
+                CASE 
+                    WHEN tp.name IN ('varchar', 'nvarchar', 'char', 'nchar') 
+                        THEN '(' + CASE WHEN c.max_length = -1 THEN 'MAX' ELSE CAST(c.max_length AS VARCHAR(10)) END + ')'
+                    WHEN tp.name IN ('decimal', 'numeric') 
+                        THEN '(' + CAST(c.[precision] AS VARCHAR(10)) + ',' + CAST(c.scale AS VARCHAR(10)) + ')'
+                    ELSE ''
+                END +
+                CASE WHEN c.is_nullable = 1 THEN ' NULL' ELSE ' NOT NULL' END +
+                CASE WHEN dc.definition IS NOT NULL THEN ' DEFAULT ' + dc.definition ELSE '' END
+        END AS ColumnDef
     FROM sys.columns c
     JOIN sys.types tp ON c.system_type_id = tp.system_type_id AND c.user_type_id = tp.user_type_id
     LEFT JOIN sys.default_constraints dc ON c.[object_id] = dc.parent_object_id AND c.column_id = dc.parent_column_id
     WHERE c.[object_id] = OBJECT_ID(@SchemaName + '.' + @TableName)
     AND c.name != 'Id'
+    ORDER BY c.column_id
+    
+    OPEN ColumnDefCursor
+    FETCH NEXT FROM ColumnDefCursor INTO @ColumnDef
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        IF @FirstColumn = 1
+            SET @FirstColumn = 0
+        ELSE
+            SET @TempOutput = @TempOutput + ',' + CHAR(13) + CHAR(10)
+            
+        SET @TempOutput = @TempOutput + @ColumnDef
+        FETCH NEXT FROM ColumnDefCursor INTO @ColumnDef
+    END
+    
+    CLOSE ColumnDefCursor
+    DEALLOCATE ColumnDefCursor
+    
+    -- Add column definitions to output
+    SET @Output = @Output + @TempOutput
 
     -- Primary Key
     SET @Output = @Output + ',' + CHAR(13) + CHAR(10)
@@ -88,121 +107,192 @@ BEGIN
     -- Generate INSERT statements for table data
     SET @Output = @Output + '-- Insert data into ' + @TableName + CHAR(13) + CHAR(10)
     
-    -- Get column list for INSERT statement
-    SELECT @ColumnList = STRING_AGG(QUOTENAME(name), ',') WITHIN GROUP (ORDER BY column_id)
+    -- Build column list for INSERT statements
+    SET @ColumnList = ''
+    DECLARE @ValuesList NVARCHAR(MAX) = ''
+    SET @FirstColumn = 1
+    
+    -- Get column names for INSERT statement
+    DECLARE ColumnListCursor CURSOR FOR
+    SELECT QUOTENAME(name)
     FROM sys.columns 
     WHERE object_id = OBJECT_ID(@SchemaName + '.' + @TableName)
     AND is_computed = 0
-    AND name != 'Id'  -- Exclude identity column
-
-    -- Get column expressions for data export
-    SELECT @Columns = STRING_AGG(
-        'ISNULL(CASE WHEN ' + QUOTENAME(c.name) + ' IS NULL THEN ''NULL'' ' +
-        'WHEN ' + CASE 
-            WHEN t.name IN ('varchar', 'nvarchar', 'char', 'nchar', 'text', 'ntext') 
-                THEN '1=1 THEN '''''''' + REPLACE(CAST(' + QUOTENAME(c.name) + ' AS NVARCHAR(MAX)), '''''''', '''''''''''') + '''''''' '
-            WHEN t.name IN ('datetime', 'datetime2', 'date', 'time') 
-                THEN '1=1 THEN '''''''' + CONVERT(VARCHAR, ' + QUOTENAME(c.name) + ', 121) + '''''''' '
-            WHEN t.name = 'uniqueidentifier'
-                THEN '1=1 THEN '''''''' + CAST(' + QUOTENAME(c.name) + ' AS VARCHAR(36)) + '''''''' '
-            WHEN t.name = 'bit'
-                THEN '1=1 THEN CAST(' + QUOTENAME(c.name) + ' AS VARCHAR(1)) '
-            ELSE '1=1 THEN CAST(' + QUOTENAME(c.name) + ' AS NVARCHAR(MAX)) '
-        END + 'END, ''NULL'')', 
-        ', ') WITHIN GROUP (ORDER BY c.column_id)
-    FROM sys.columns c
-    JOIN sys.types t ON c.user_type_id = t.user_type_id
-    WHERE c.object_id = OBJECT_ID(@SchemaName + '.' + @TableName)
-    AND c.is_computed = 0
-    AND c.name != 'Id'  -- Exclude identity column
-
-    -- Create dynamic SQL to generate INSERT statements
-    IF @Columns IS NOT NULL
+    AND name != 'Id'
+    ORDER BY column_id
+    
+    DECLARE @ColName NVARCHAR(128)
+    
+    OPEN ColumnListCursor
+    FETCH NEXT FROM ColumnListCursor INTO @ColName
+    
+    WHILE @@FETCH_STATUS = 0
     BEGIN
-        SET @SQL = N'
-        DECLARE @InsertData NVARCHAR(MAX) = ''''
-        SELECT @InsertData = @InsertData + 
-            ''INSERT INTO [' + @SchemaName + '].[' + @TableName + '] (' + @ColumnList + ') VALUES ('' + 
-            ' + @Columns + ' + 
-            '');'' + CHAR(13) + CHAR(10)
-        FROM [' + @SchemaName + '].[' + @TableName + ']
-        ORDER BY [Id];
-
-        IF @@ROWCOUNT > 0
-            SET @InsertStmt = @InsertStmt + @InsertData + ''GO'' + CHAR(13) + CHAR(10)'
-
-        -- Execute the dynamic SQL
-        EXEC sp_executesql @SQL, N'@InsertStmt NVARCHAR(MAX) OUTPUT', @InsertStmt OUTPUT
+        IF @FirstColumn = 1
+            SET @FirstColumn = 0
+        ELSE
+            SET @ColumnList = @ColumnList + ', '
+            
+        SET @ColumnList = @ColumnList + @ColName
+        FETCH NEXT FROM ColumnListCursor INTO @ColName
     END
     
-    -- Add INSERT statements to output
-    IF LEN(@InsertStmt) > 0
+    CLOSE ColumnListCursor
+    DEALLOCATE ColumnListCursor
+
+    -- Generate INSERT statements using a different approach
+    IF LEN(@ColumnList) > 0
     BEGIN
-        SET @Output = @Output + @InsertStmt + CHAR(13) + CHAR(10)
+        -- Build dynamic SQL to generate INSERT statements
+        DECLARE @SelectColumns NVARCHAR(MAX) = ''
+        SET @FirstColumn = 1
+        
+        -- Build SELECT statement for values
+        DECLARE ValuesCursor CURSOR FOR
+        SELECT 
+            c.name,
+            tp.name as DataType
+        FROM sys.columns c
+        JOIN sys.types tp ON c.system_type_id = tp.system_type_id AND c.user_type_id = tp.user_type_id
+        WHERE c.object_id = OBJECT_ID(@SchemaName + '.' + @TableName)
+        AND c.is_computed = 0
+        AND c.name != 'Id'
+        ORDER BY c.column_id
+        
+        DECLARE @CurrentCol NVARCHAR(128)
+        DECLARE @CurrentType NVARCHAR(128)
+        
+        OPEN ValuesCursor
+        FETCH NEXT FROM ValuesCursor INTO @CurrentCol, @CurrentType
+        
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            IF @FirstColumn = 1
+                SET @FirstColumn = 0
+            ELSE
+                SET @SelectColumns = @SelectColumns + ' + '', '' + '
+                
+            -- Handle different data types appropriately
+            SET @SelectColumns = @SelectColumns + 
+                CASE 
+                    WHEN @CurrentType IN ('varchar', 'nvarchar', 'char', 'nchar')
+                        THEN 'CASE WHEN [' + @CurrentCol + '] IS NULL THEN ''NULL'' ELSE '''''''' + REPLACE([' + @CurrentCol + '], '''''''', '''''''''''') + '''''''' END'
+                    WHEN @CurrentType IN ('text', 'ntext')
+                        THEN 'CASE WHEN [' + @CurrentCol + '] IS NULL THEN ''NULL'' ELSE '''''''' + REPLACE(CAST([' + @CurrentCol + '] AS NVARCHAR(MAX)), '''''''', '''''''''''') + '''''''' END'
+                    WHEN @CurrentType IN ('datetime', 'datetime2', 'date', 'time', 'smalldatetime')
+                        THEN 'CASE WHEN [' + @CurrentCol + '] IS NULL THEN ''NULL'' ELSE '''''''' + CONVERT(VARCHAR, [' + @CurrentCol + '], 121) + '''''''' END'
+                    WHEN @CurrentType = 'bit'
+                        THEN 'CASE WHEN [' + @CurrentCol + '] IS NULL THEN ''NULL'' WHEN [' + @CurrentCol + '] = 1 THEN ''1'' ELSE ''0'' END'
+                    ELSE 'CASE WHEN [' + @CurrentCol + '] IS NULL THEN ''NULL'' ELSE CAST([' + @CurrentCol + '] AS VARCHAR(MAX)) END'
+                END
+                
+            FETCH NEXT FROM ValuesCursor INTO @CurrentCol, @CurrentType
+        END
+        
+        CLOSE ValuesCursor
+        DEALLOCATE ValuesCursor
+        
+        -- Generate the INSERT statements
+        IF LEN(@SelectColumns) > 0
+        BEGIN
+            DECLARE @InsertSQL NVARCHAR(MAX)
+            SET @InsertSQL = N'
+                SELECT @Result = @Result + ''INSERT INTO [' + @SchemaName + '].[' + @TableName + '] (' + @ColumnList + ') VALUES ('' + 
+                    ' + @SelectColumns + ' + 
+                    '');'' + CHAR(13) + CHAR(10)
+                FROM [' + @SchemaName + '].[' + @TableName + ']'
+
+            DECLARE @Result NVARCHAR(MAX) = ''
+            
+            EXEC sp_executesql @InsertSQL, N'@Result NVARCHAR(MAX) OUTPUT', @Result OUTPUT
+            
+            IF LEN(@Result) > 0
+            BEGIN
+                SET @Output = @Output + @Result + 'GO' + CHAR(13) + CHAR(10) + CHAR(13) + CHAR(10)
+            END
+        END
     END
 
-    SET @InsertStmt = ''  -- Reset for next table
     FETCH NEXT FROM TableCursor INTO @TableName
 END
 
 CLOSE TableCursor
 DEALLOCATE TableCursor
 
--- Foreign Keys
-SET @Output = @Output + '-- Add Foreign Keys' + CHAR(13) + CHAR(10)
-SELECT @Output = @Output +
-    'ALTER TABLE [' + @SchemaName + '].[' + OBJECT_NAME(fk.parent_object_id) + '] ' +
-    'ADD CONSTRAINT [' + fk.name + '] FOREIGN KEY (' +
-    (
-        SELECT STRING_AGG(QUOTENAME(c.name), ',')
-        FROM sys.foreign_key_columns fkc
-        JOIN sys.columns c ON fkc.parent_object_id = c.[object_id] AND fkc.parent_column_id = c.column_id
-        WHERE fkc.constraint_object_id = fk.[object_id]
-    ) +
-    ') REFERENCES [' + @SchemaName + '].[' + OBJECT_NAME(fk.referenced_object_id) + '] (' +
-    (
-        SELECT STRING_AGG(QUOTENAME(c.name), ',')
-        FROM sys.foreign_key_columns fkc
-        JOIN sys.columns c ON fkc.referenced_object_id = c.[object_id] AND fkc.referenced_column_id = c.column_id
-        WHERE fkc.constraint_object_id = fk.[object_id]
-    ) + ');' + CHAR(13) + CHAR(10) + 'GO' + CHAR(13) + CHAR(10)
-FROM sys.foreign_keys fk
-WHERE SCHEMA_ID(@SchemaName) = fk.schema_id
+-- Export Stored Procedures
+SET @Output = @Output + '-- Export Stored Procedures' + CHAR(13) + CHAR(10)
 
--- Triggers
-SET @Output = @Output + CHAR(13) + CHAR(10) + '-- Create Triggers' + CHAR(13) + CHAR(10)
-SELECT @Output = @Output +
-    'CREATE TRIGGER [' + @SchemaName + '].[' + t.name + '] ON [' + @SchemaName + '].[' + OBJECT_NAME(t.parent_id) + ']' + CHAR(13) + CHAR(10) +
-    CASE 
-        WHEN OBJECTPROPERTY(t.[object_id], 'ExecIsInsteadOfTrigger') = 1 THEN 'INSTEAD OF '
-        ELSE 'AFTER '
-    END +
-    STUFF((
-        SELECT ',' + TRIGGER_EVENT
-        FROM (
-            SELECT 'INSERT' AS TRIGGER_EVENT WHERE OBJECTPROPERTY(t.[object_id], 'ExecIsInsertTrigger') = 1
-            UNION ALL
-            SELECT 'UPDATE' WHERE OBJECTPROPERTY(t.[object_id], 'ExecIsUpdateTrigger') = 1
-            UNION ALL
-            SELECT 'DELETE' WHERE OBJECTPROPERTY(t.[object_id], 'ExecIsDeleteTrigger') = 1
-        ) AS Events
-        FOR XML PATH('')
-    ), 1, 1, '') + CHAR(13) + CHAR(10) +
-    'AS' + CHAR(13) + CHAR(10) +
-    OBJECT_DEFINITION(t.[object_id]) + CHAR(13) + CHAR(10) +
-    'GO' + CHAR(13) + CHAR(10)
+DECLARE ProcedureCursor CURSOR FOR 
+SELECT OBJECT_SCHEMA_NAME(object_id) as schema_name,
+       name,
+       OBJECT_DEFINITION(object_id) as procedure_definition
+FROM sys.procedures
+WHERE OBJECT_SCHEMA_NAME(object_id) = @SchemaName
+ORDER BY name
+
+DECLARE @ProcName NVARCHAR(128)
+DECLARE @ProcSchema NVARCHAR(128)
+DECLARE @ProcDefinition NVARCHAR(MAX)
+
+OPEN ProcedureCursor
+FETCH NEXT FROM ProcedureCursor INTO @ProcSchema, @ProcName, @ProcDefinition
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    -- Drop procedure if exists
+    SET @Output = @Output + 'IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N''[' + @ProcSchema + '].[' + @ProcName + ']'') AND type in (N''P''))' + CHAR(13) + CHAR(10)
+    SET @Output = @Output + '    DROP PROCEDURE [' + @ProcSchema + '].[' + @ProcName + '];' + CHAR(13) + CHAR(10)
+    SET @Output = @Output + 'GO' + CHAR(13) + CHAR(10) + CHAR(13) + CHAR(10)
+
+    -- Create procedure
+    SET @Output = @Output + @ProcDefinition + CHAR(13) + CHAR(10)
+    SET @Output = @Output + 'GO' + CHAR(13) + CHAR(10) + CHAR(13) + CHAR(10)
+
+    FETCH NEXT FROM ProcedureCursor INTO @ProcSchema, @ProcName, @ProcDefinition
+END
+
+CLOSE ProcedureCursor
+DEALLOCATE ProcedureCursor
+
+-- Export Triggers
+SET @Output = @Output + '-- Export Triggers' + CHAR(13) + CHAR(10)
+
+DECLARE TriggerCursor CURSOR FOR 
+SELECT 
+    OBJECT_SCHEMA_NAME(t.object_id) as schema_name,
+    t.name as trigger_name,
+    OBJECT_NAME(t.parent_id) as table_name,
+    OBJECT_DEFINITION(t.object_id) as trigger_definition
 FROM sys.triggers t
-JOIN sys.tables tab ON t.parent_id = tab.[object_id]
-WHERE tab.schema_id = SCHEMA_ID(@SchemaName)
+JOIN sys.objects o ON t.parent_id = o.object_id
+WHERE OBJECT_SCHEMA_NAME(t.object_id) = @SchemaName
+AND t.is_ms_shipped = 0  -- Exclude system triggers
+ORDER BY t.name
 
--- Stored Procedures
-SET @Output = @Output + CHAR(13) + CHAR(10) + '-- Create Stored Procedures' + CHAR(13) + CHAR(10)
-SELECT @Output = @Output +
-    'CREATE PROCEDURE [' + @SchemaName + '].[' + p.name + ']' + CHAR(13) + CHAR(10) +
-    OBJECT_DEFINITION(p.[object_id]) + CHAR(13) + CHAR(10) +
-    'GO' + CHAR(13) + CHAR(10)
-FROM sys.procedures p
-WHERE p.schema_id = SCHEMA_ID(@SchemaName)
+DECLARE @TriggerName NVARCHAR(128)
+DECLARE @TriggerSchema NVARCHAR(128)
+DECLARE @TriggerTableName NVARCHAR(128)
+DECLARE @TriggerDefinition NVARCHAR(MAX)
+
+OPEN TriggerCursor
+FETCH NEXT FROM TriggerCursor INTO @TriggerSchema, @TriggerName, @TriggerTableName, @TriggerDefinition
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    -- Drop trigger if exists
+    SET @Output = @Output + 'IF EXISTS (SELECT * FROM sys.triggers WHERE object_id = OBJECT_ID(N''[' + @TriggerSchema + '].[' + @TriggerName + ']''))' + CHAR(13) + CHAR(10)
+    SET @Output = @Output + '    DROP TRIGGER [' + @TriggerSchema + '].[' + @TriggerName + '];' + CHAR(13) + CHAR(10)
+    SET @Output = @Output + 'GO' + CHAR(13) + CHAR(10) + CHAR(13) + CHAR(10)
+
+    -- Create trigger
+    SET @Output = @Output + @TriggerDefinition + CHAR(13) + CHAR(10)
+    SET @Output = @Output + 'GO' + CHAR(13) + CHAR(10) + CHAR(13) + CHAR(10)
+
+    FETCH NEXT FROM TriggerCursor INTO @TriggerSchema, @TriggerName, @TriggerTableName, @TriggerDefinition
+END
+
+CLOSE TriggerCursor
+DEALLOCATE TriggerCursor
 
 -- Print the output in chunks (SQL Server has a limit on print size)
 DECLARE @ChunkSize INT = 4000
@@ -215,4 +305,4 @@ BEGIN
     SET @Start = @Start + @ChunkSize
 END
 
-PRINT '-- Script generation completed. Copy the above output and save it to a .sql file.' 
+PRINT '-- Script generation completed. Copy the above output and save it to a .sql file.'
