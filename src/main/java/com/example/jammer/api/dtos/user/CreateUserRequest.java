@@ -16,9 +16,19 @@ public class CreateUserRequest {
     @Setter
     private String password;
 
-    public CreateUserRequest(String username, String email, String password) {
+    @Getter
+    @Setter
+    private String firstName;
+
+    @Getter
+    @Setter
+    private String lastName;
+
+    public CreateUserRequest(String username, String email, String password, String firstName, String lastName) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 }

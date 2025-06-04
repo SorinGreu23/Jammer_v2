@@ -2,6 +2,7 @@ package com.example.jammer.persistence;
 
 import com.example.jammer.domain.model.Board;
 import com.example.jammer.domain.repository.BoardRepository;
+import com.example.jammer.api.dtos.board.BoardStatisticsResponse;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -82,6 +83,43 @@ public class BoardRepositoryImpl implements BoardRepository {
             throw new RuntimeException("Error finding board by ID", e);
         }
         return null;
+    }
+
+    @Override
+    public List<BoardStatisticsResponse> getBoardStatistics(int userId) {
+        String sql = "{CALL [Workspace].[GetUserBoardStatistics](?)}";
+        List<BoardStatisticsResponse> statistics = new ArrayList<>();
+        
+        try (Connection conn = dataSource.getConnection();
+             CallableStatement cs = conn.prepareCall(sql)) {
+            
+            cs.setInt(1, userId);
+            boolean hasResults = cs.execute();
+            
+            // Skip the first result set (debug information)
+            if (hasResults) {
+                cs.getResultSet().close();
+                hasResults = cs.getMoreResults();
+            }
+            
+            // Process the second result set (actual statistics)
+            if (hasResults) {
+                try (ResultSet rs = cs.getResultSet()) {
+                    while (rs.next()) {
+                        statistics.add(new BoardStatisticsResponse(
+                                rs.getInt("BoardId"),
+                                rs.getString("BoardName"),
+                                rs.getInt("TotalTasks"),
+                                rs.getInt("CompletedTasks"),
+                                rs.getDouble("CompletionPercentage")
+                        ));
+                    }
+                }
+            }
+            return statistics;
+        } catch (SQLException e) {
+            throw new RuntimeException("Error getting board statistics", e);
+        }
     }
 
     private Board insert(Board board) {

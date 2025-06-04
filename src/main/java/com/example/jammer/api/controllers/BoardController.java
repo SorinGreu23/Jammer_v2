@@ -6,10 +6,9 @@ import com.example.jammer.application.board.CreateBoardUseCase;
 import com.example.jammer.application.board.GetBoardsByUserUseCase;
 import com.example.jammer.application.board.UpdateBoardUseCase;
 import com.example.jammer.application.board.DeleteBoardUseCase;
-
-
-
+import com.example.jammer.application.board.GetBoardStatisticsUseCase;
 import com.example.jammer.domain.model.Board;
+import com.example.jammer.api.dtos.board.BoardStatisticsResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,17 +23,20 @@ public class BoardController {
     private final GetBoardsByUserUseCase getBoardsByUserUseCase;
     private final UpdateBoardUseCase updateBoardUseCase;
     private final DeleteBoardUseCase deleteBoardUseCase;
+    private final GetBoardStatisticsUseCase getBoardStatisticsUseCase;
 
     public BoardController(
             CreateBoardUseCase createBoardUseCase,
             GetBoardsByUserUseCase getBoardsByUserUseCase,
             UpdateBoardUseCase updateBoardUseCase,
-            DeleteBoardUseCase deleteBoardUseCase
+            DeleteBoardUseCase deleteBoardUseCase,
+            GetBoardStatisticsUseCase getBoardStatisticsUseCase
     ) {
         this.createBoardUseCase = createBoardUseCase;
         this.getBoardsByUserUseCase = getBoardsByUserUseCase;
         this.updateBoardUseCase = updateBoardUseCase;
         this.deleteBoardUseCase = deleteBoardUseCase;
+        this.getBoardStatisticsUseCase = getBoardStatisticsUseCase;
     }
 
     @DeleteMapping("/{boardId}")
@@ -59,5 +61,11 @@ public class BoardController {
     @ResponseStatus(HttpStatus.OK)
     public List<Board> getBoardsByUserId(@PathVariable int userId) {
         return getBoardsByUserUseCase.execute(userId);
+    }
+
+    @GetMapping("/user/{userId}/statistics")
+    @ResponseStatus(HttpStatus.OK)
+    public List<BoardStatisticsResponse> getBoardStatistics(@PathVariable int userId) {
+        return getBoardStatisticsUseCase.execute(userId);
     }
 }

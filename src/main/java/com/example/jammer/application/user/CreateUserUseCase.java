@@ -38,6 +38,8 @@ public class CreateUserUseCase {
                 request.getUsername(),
                 request.getEmail(),
                 hash,
+                request.getFirstName(),
+                request.getLastName(),
                 Date.valueOf(LocalDate.now())
         );
 

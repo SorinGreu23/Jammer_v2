@@ -1,6 +1,13 @@
 .account-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 25%, #2d1b69 50%, #1a1a1a 75%, #0c0c0c 100%);
+  background: linear-gradient(
+    135deg,
+    #0c0c0c 0%,
+    #1a1a1a 25%,
+    #2d1b69 50%,
+    #1a1a1a 75%,
+    #0c0c0c 100%
+  );
   position: relative;
   overflow: hidden;
   padding: 2rem;
@@ -16,13 +23,13 @@
   height: 100%;
   z-index: 1;
   overflow: hidden;
-  
+
   .bg-circle {
     position: absolute;
     border-radius: 50%;
     opacity: 0.05;
     animation: float 8s ease-in-out infinite;
-    
+
     &.bg-circle-1 {
       width: 400px;
       height: 400px;
@@ -31,7 +38,7 @@
       right: -10%;
       animation-delay: 0s;
     }
-    
+
     &.bg-circle-2 {
       width: 300px;
       height: 300px;
@@ -40,7 +47,7 @@
       left: -8%;
       animation-delay: 3s;
     }
-    
+
     &.bg-circle-3 {
       width: 200px;
       height: 200px;
@@ -53,7 +60,8 @@
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg) scale(1);
   }
   50% {
@@ -71,7 +79,7 @@
 
 .account-header {
   margin-bottom: 2rem;
-  
+
   .back-button {
     color: rgba(255, 255, 255, 0.7) !important;
     border: none !important;
@@ -80,17 +88,17 @@
     border-radius: 8px !important;
     margin-bottom: 2rem !important;
     transition: all 0.3s ease !important;
-    
+
     &:hover {
       background: rgba(255, 255, 255, 0.2) !important;
       color: rgba(255, 255, 255, 1) !important;
       transform: translateX(-2px) !important;
     }
   }
-  
+
   .brand-section {
     text-align: center;
-    
+
     .logo {
       width: 50px;
       height: 50px;
@@ -101,13 +109,13 @@
       justify-content: center;
       margin: 0 auto 1rem;
       box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
-      
+
       .pi {
         font-size: 1.5rem;
         color: white;
       }
     }
-    
+
     .brand-title {
       font-size: 2.5rem;
       font-weight: 700;
@@ -119,7 +127,7 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
+
     .brand-subtitle {
       color: rgba(255, 255, 255, 0.7);
       margin: 0;
@@ -144,69 +152,77 @@
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
   }
-  
+
   .profile-header {
     display: flex;
     align-items: center;
     gap: 2rem;
-    
+
     .avatar-section {
       position: relative;
-      
+
       .avatar-edit-btn {
         position: absolute;
         bottom: -5px;
         right: -5px;
         width: 35px !important;
         height: 35px !important;
-        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+        background: linear-gradient(
+          135deg,
+          #22c55e 0%,
+          #16a34a 100%
+        ) !important;
         border: 2px solid rgba(255, 255, 255, 0.2) !important;
         color: white !important;
-        
+
         &:hover {
-          background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+          background: linear-gradient(
+            135deg,
+            #16a34a 0%,
+            #15803d 100%
+          ) !important;
           transform: scale(1.1) !important;
         }
       }
     }
-    
+
     .profile-info {
       flex: 1;
-      
+
       h2 {
         margin: 0 0 0.5rem;
         color: rgba(255, 255, 255, 0.95);
         font-size: 2rem;
         font-weight: 600;
       }
-      
+
       .user-email {
         margin: 0 0 1rem;
         color: rgba(255, 255, 255, 0.7);
         font-size: 1.1rem;
       }
-      
+
       .user-badges {
         display: flex;
         gap: 0.75rem;
-        
+
         .badge {
           padding: 0.3rem 0.8rem;
           border-radius: 15px;
           font-size: 0.8rem;
           font-weight: 500;
-          
+
           &.active-badge {
             background: rgba(34, 197, 94, 0.2);
             color: #22c55e;
             border: 1px solid rgba(34, 197, 94, 0.3);
           }
-          
+
           &.member-badge {
             background: rgba(59, 130, 246, 0.2);
             color: #60a5fa;
@@ -235,29 +251,29 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
   overflow: hidden;
-  
+
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
     border-color: rgba(255, 255, 255, 0.15);
   }
-  
+
   .card-header {
     padding: 1.5rem 1.5rem 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
+
     .header-left {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      
+
       i {
         color: #22c55e;
         font-size: 1.2rem;
       }
-      
+
       h3 {
         margin: 0;
         color: rgba(255, 255, 255, 0.95);
@@ -265,17 +281,17 @@
         font-weight: 600;
       }
     }
-    
+
     .edit-btn {
       color: rgba(255, 255, 255, 0.6) !important;
-      
+
       &:hover {
         color: rgba(255, 255, 255, 0.9) !important;
         background: rgba(255, 255, 255, 0.1) !important;
       }
     }
   }
-  
+
   .card-content {
     padding: 1.5rem;
   }
@@ -286,7 +302,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1.25rem;
-  
+
   .info-item {
     label {
       display: block;
@@ -297,7 +313,7 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    
+
     span {
       color: rgba(255, 255, 255, 0.9);
       font-size: 1rem;
@@ -311,7 +327,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  
+
   .security-item {
     display: flex;
     justify-content: space-between;
@@ -320,7 +336,7 @@
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    
+
     .security-info {
       h4 {
         margin: 0 0 0.3rem;
@@ -328,18 +344,18 @@
         font-size: 1rem;
         font-weight: 600;
       }
-      
+
       p {
         margin: 0;
         color: rgba(255, 255, 255, 0.6);
         font-size: 0.9rem;
       }
     }
-    
+
     button {
       border-color: rgba(255, 255, 255, 0.3) !important;
       color: rgba(255, 255, 255, 0.8) !important;
-      
+
       &:hover {
         background: rgba(255, 255, 255, 0.1) !important;
         border-color: rgba(255, 255, 255, 0.5) !important;
@@ -354,12 +370,12 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  
+
   .preference-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
+
     .preference-info {
       h4 {
         margin: 0 0 0.3rem;
@@ -367,7 +383,7 @@
         font-size: 1rem;
         font-weight: 600;
       }
-      
+
       p {
         margin: 0;
         color: rgba(255, 255, 255, 0.6);
@@ -380,21 +396,21 @@
 // Toggle Switch
 .toggle-switch {
   position: relative;
-  
+
   input[type="checkbox"] {
     opacity: 0;
     width: 0;
     height: 0;
-    
+
     &:checked + label {
       background-color: #22c55e;
-      
+
       &:before {
         transform: translateX(20px);
       }
     }
   }
-  
+
   label {
     display: block;
     width: 44px;
@@ -404,9 +420,9 @@
     position: relative;
     cursor: pointer;
     transition: all 0.3s ease;
-    
+
     &:before {
-      content: '';
+      content: "";
       position: absolute;
       top: 2px;
       left: 2px;
@@ -416,7 +432,7 @@
       border-radius: 50%;
       transition: transform 0.3s ease;
     }
-    
+
     &:hover {
       background-color: rgba(255, 255, 255, 0.3);
     }
@@ -426,26 +442,26 @@
 // Statistics Card
 .stats-card {
   grid-column: 1 / -1;
-  
+
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1.5rem;
-    
+
     .stat-item {
       text-align: center;
       padding: 1rem;
       background: rgba(255, 255, 255, 0.05);
       border-radius: 10px;
       border: 1px solid rgba(255, 255, 255, 0.08);
-      
+
       .stat-number {
         font-size: 2rem;
         font-weight: 700;
         color: #22c55e;
         margin-bottom: 0.5rem;
       }
-      
+
       .stat-label {
         color: rgba(255, 255, 255, 0.7);
         font-size: 0.9rem;
@@ -453,24 +469,44 @@
       }
     }
   }
+
+  .loading-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 1rem;
+
+    i {
+      font-size: 2rem;
+      color: #22c55e;
+    }
+
+    p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
 }
 
 // Danger Zone
 .danger-zone {
   margin-top: 2rem;
-  
+
   .danger-card {
     border-color: rgba(239, 68, 68, 0.3) !important;
-    
+
     .card-header .header-left i {
       color: #ef4444 !important;
     }
-    
+
     .danger-actions {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
-      
+
       .danger-item {
         display: flex;
         justify-content: space-between;
@@ -479,7 +515,7 @@
         background: rgba(239, 68, 68, 0.05);
         border-radius: 10px;
         border: 1px solid rgba(239, 68, 68, 0.2);
-        
+
         .danger-info {
           h4 {
             margin: 0 0 0.3rem;
@@ -487,18 +523,18 @@
             font-size: 1rem;
             font-weight: 600;
           }
-          
+
           p {
             margin: 0;
             color: rgba(255, 255, 255, 0.6);
             font-size: 0.9rem;
           }
         }
-        
+
         .logout-btn {
           border-color: rgba(255, 255, 255, 0.3) !important;
           color: rgba(255, 255, 255, 0.8) !important;
-          
+
           &:hover {
             background: rgba(255, 255, 255, 0.1) !important;
             border-color: rgba(255, 255, 255, 0.5) !important;
@@ -537,7 +573,7 @@
   .settings-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .stats-card .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -548,35 +584,35 @@
     padding: 1rem;
     padding-top: 80px;
   }
-  
+
   .account-header .brand-section {
     .brand-title {
       font-size: 2rem;
     }
   }
-  
+
   .profile-card .profile-header {
     flex-direction: column;
     text-align: center;
     gap: 1.5rem;
   }
-  
+
   .settings-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .security-item,
   .danger-item {
     flex-direction: column;
     align-items: flex-start !important;
     gap: 1rem;
-    
+
     button {
       align-self: stretch;
     }
   }
-  
+
   .stats-card .stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
@@ -587,8 +623,74 @@
   .stats-card .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .info-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+// Edit Form
+.edit-form {
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    label {
+      display: block;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      width: 100%;
+      transition: all 0.3s ease;
+
+      &:focus {
+        border-color: #22c55e;
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+      }
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    button {
+      min-width: 120px;
+
+      &.p-button-text {
+        color: rgba(255, 255, 255, 0.7);
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+      }
+
+      &.p-button-primary {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        border: none;
+
+        &:hover {
+          background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+        }
+      }
+    }
   }
 }

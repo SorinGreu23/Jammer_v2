@@ -15,19 +15,21 @@
             <i class="pi pi-sitemap"></i>
           </div>
           <h1 class="brand-title">{{ title }}</h1>
-          <p class="brand-subtitle" *ngIf="currentUser">Welcome back, {{ currentUser.username }}!</p>
+          <p class="brand-subtitle" *ngIf="currentUser">
+            Welcome back, {{ currentUser.username }}!
+          </p>
         </div>
       </div>
-      
+
       <div class="header-actions" *ngIf="currentUser">
-        <button 
-          pButton 
-          type="button" 
-          label="Create Board" 
+        <button
+          pButton
+          type="button"
+          label="Create Board"
           icon="pi pi-plus"
           class="create-board-btn"
-          (click)="openCreateModal()">
-        </button>
+          (click)="openCreateModal()"
+        ></button>
       </div>
     </div>
 
@@ -39,33 +41,47 @@
           <h2>Your Boards</h2>
           <p>Manage your projects and workflows</p>
         </div>
-        
+
         <div class="boards-grid" *ngIf="boards.length > 0">
-          <div class="board-card" 
-               *ngFor="let board of boards" 
-               (click)="onBoardClick(board)">
+          <div
+            class="board-card"
+            *ngFor="let board of boards"
+            (click)="onBoardClick(board)"
+          >
             <div class="card-header">
               <h3>{{ board.name }}</h3>
               <div class="card-icon">
                 <i class="pi pi-sitemap"></i>
               </div>
             </div>
-            
+
             <div class="card-stats">
               <div class="stat-item">
                 <div class="stat-number">{{ board.taskCount || 0 }}</div>
                 <div class="stat-label">Total Tasks</div>
               </div>
+              <div class="stat-item">
+                <div class="stat-number completed">
+                  {{ board.completedTasks || 0 }}
+                </div>
+                <div class="stat-label">Completed</div>
+              </div>
               <div class="stat-item" *ngIf="board.pendingTasks > 0">
                 <div class="stat-number pending">{{ board.pendingTasks }}</div>
                 <div class="stat-label">Pending</div>
               </div>
+              <div class="stat-item">
+                <div class="stat-number percentage">
+                  {{ board.completionPercentage | number : "1.0-0" }}%
+                </div>
+                <div class="stat-label">Complete</div>
+              </div>
             </div>
-            
+
             <div class="card-footer">
               <div class="board-date">
                 <i class="pi pi-calendar"></i>
-                <span>{{ board.createdAt | date:'MMM d, y' }}</span>
+                <span>{{ board.createdAt | date : "MMM d, y" }}</span>
               </div>
               <div class="board-status">
                 <span class="status-badge active">Active</span>
@@ -93,15 +109,18 @@
             <i class="pi pi-sitemap"></i>
           </div>
           <h3>Welcome to Jammer!</h3>
-          <p>You don't have any boards yet. Create your first board to start organizing your tasks and projects.</p>
-          <button 
-            pButton 
-            type="button" 
-            label="Create Your First Board" 
+          <p>
+            You don't have any boards yet. Create your first board to start
+            organizing your tasks and projects.
+          </p>
+          <button
+            pButton
+            type="button"
+            label="Create Your First Board"
             icon="pi pi-plus"
             class="create-first-btn"
-            (click)="openCreateModal()">
-          </button>
+            (click)="openCreateModal()"
+          ></button>
         </div>
       </div>
     </div>
@@ -109,53 +128,54 @@
 </div>
 
 <!-- Create Board Modal -->
-<p-dialog 
-  header="Create New Board" 
-  [(visible)]="showCreateModal" 
-  [modal]="true" 
-  [style]="{width: '450px'}"
+<p-dialog
+  header="Create New Board"
+  [(visible)]="showCreateModal"
+  [modal]="true"
+  [style]="{ width: '450px' }"
   [closable]="true"
   [draggable]="false"
   styleClass="custom-modal"
-  (onHide)="closeCreateModal()">
-  
+  (onHide)="closeCreateModal()"
+>
   <div class="create-board-form">
     <div class="form-field">
       <label for="boardName">Board Name</label>
-      <input 
-        pInputText 
-        id="boardName" 
-        type="text" 
+      <input
+        pInputText
+        id="boardName"
+        type="text"
         [value]="newBoardName"
         (input)="newBoardName = $any($event.target).value"
         placeholder="Enter a name for your board"
         class="form-input"
         [disabled]="creatingBoard"
         (keyup.enter)="createBoard()"
-        #boardNameInput>
+        #boardNameInput
+      />
     </div>
   </div>
-  
+
   <ng-template pTemplate="footer">
     <div class="modal-footer">
-      <button 
-        pButton 
-        type="button" 
-        label="Cancel" 
+      <button
+        pButton
+        type="button"
+        label="Cancel"
         class="cancel-btn"
         (click)="closeCreateModal()"
-        [disabled]="creatingBoard">
-      </button>
-      <button 
-        pButton 
-        type="button" 
-        label="Create Board" 
+        [disabled]="creatingBoard"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Create Board"
         icon="pi pi-check"
         class="create-btn"
         (click)="createBoard()"
         [disabled]="!newBoardName.trim() || creatingBoard"
-        [loading]="creatingBoard">
-      </button>
+        [loading]="creatingBoard"
+      ></button>
     </div>
   </ng-template>
 </p-dialog>

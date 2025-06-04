@@ -9,15 +9,16 @@
   <div class="account-content">
     <!-- Header Section -->
     <div class="account-header">
-      <button 
-        pButton 
-        type="button" 
-        icon="pi pi-arrow-left" 
+      <button
+        pButton
+        type="button"
+        icon="pi pi-arrow-left"
         class="p-button-text back-button"
-        (click)="goBackToDashboard()">
+        (click)="goBackToDashboard()"
+      >
         Back to Dashboard
       </button>
-      
+
       <div class="header-info">
         <div class="brand-section">
           <div class="logo">
@@ -35,26 +36,36 @@
       <div class="profile-card">
         <div class="profile-header">
           <div class="avatar-section">
-            <p-avatar 
-              [label]="getInitials()" 
-              size="xlarge" 
-              styleClass="custom-avatar">
+            <p-avatar
+              [label]="getInitials()"
+              size="xlarge"
+              styleClass="custom-avatar"
+            >
             </p-avatar>
-            <button 
-              pButton 
-              type="button" 
-              icon="pi pi-camera" 
+            <button
+              pButton
+              type="button"
+              icon="pi pi-camera"
               class="p-button-rounded p-button-text avatar-edit-btn"
-              title="Change Avatar">
-            </button>
+              title="Change Avatar"
+            ></button>
           </div>
-          
+
           <div class="profile-info">
-            <h2>{{ currentUser?.username || 'User' }}</h2>
-            <p class="user-email">{{ currentUser?.email || 'user@example.com' }}</p>
+            <h2>{{ currentUser?.username || "User" }}</h2>
+            <p class="user-email">
+              {{ currentUser?.email || "user@example.com" }}
+            </p>
             <div class="user-badges">
               <span class="badge active-badge">Active</span>
-              <span class="badge member-badge">Member since {{ currentUser?.createdAt ? (currentUser.createdAt | date:'MMM yyyy') : 'Jan 2024' }}</span>
+              <span class="badge member-badge"
+                >Member since
+                {{
+                  currentUser?.createdAt
+                    ? (currentUser.createdAt | date : "MMM yyyy")
+                    : "Jan 2024"
+                }}</span
+              >
             </div>
           </div>
         </div>
@@ -69,33 +80,84 @@
               <i class="pi pi-user"></i>
               <h3>Profile Information</h3>
             </div>
-            <button 
-              pButton 
-              type="button" 
-              icon="pi pi-pencil" 
-              class="p-button-text p-button-sm edit-btn">
-            </button>
+            <button
+              *ngIf="!editingProfile"
+              pButton
+              type="button"
+              icon="pi pi-pencil"
+              class="p-button-text p-button-sm edit-btn"
+              (click)="startEditing()"
+            ></button>
           </div>
-          
+
           <div class="card-content">
-            <div class="info-grid">
+            <div class="info-grid" *ngIf="!editingProfile">
               <div class="info-item">
                 <label>Username</label>
-                <span>{{ currentUser?.username || 'Not set' }}</span>
+                <span>{{ userStats?.username || "Not set" }}</span>
               </div>
               <div class="info-item">
                 <label>Email</label>
-                <span>{{ currentUser?.email || 'Not set' }}</span>
+                <span>{{ userStats?.email || "Not set" }}</span>
               </div>
               <div class="info-item">
                 <label>First Name</label>
-                <span>{{ currentUser?.firstName || 'Not set' }}</span>
+                <span>{{ userStats?.firstName || "Not set" }}</span>
               </div>
               <div class="info-item">
                 <label>Last Name</label>
-                <span>{{ currentUser?.lastName || 'Not set' }}</span>
+                <span>{{ userStats?.lastName || "Not set" }}</span>
               </div>
             </div>
+
+            <!-- Edit Form -->
+            <form
+              *ngIf="editingProfile"
+              class="edit-form"
+              (ngSubmit)="saveProfile()"
+            >
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="firstName">First Name</label>
+                  <input
+                    id="firstName"
+                    type="text"
+                    pInputText
+                    [(ngModel)]="profileForm.firstName"
+                    name="firstName"
+                    class="w-full"
+                    placeholder="Enter your first name"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="lastName">Last Name</label>
+                  <input
+                    id="lastName"
+                    type="text"
+                    pInputText
+                    [(ngModel)]="profileForm.lastName"
+                    name="lastName"
+                    class="w-full"
+                    placeholder="Enter your last name"
+                  />
+                </div>
+              </div>
+              <div class="form-actions">
+                <button
+                  pButton
+                  type="button"
+                  label="Cancel"
+                  class="p-button-text"
+                  (click)="cancelEditing()"
+                ></button>
+                <button
+                  pButton
+                  type="submit"
+                  label="Save Changes"
+                  class="p-button-primary"
+                ></button>
+              </div>
+            </form>
           </div>
         </div>
 
@@ -106,40 +168,47 @@
               <i class="pi pi-shield"></i>
               <h3>Account Security</h3>
             </div>
-            <button 
-              pButton 
-              type="button" 
-              icon="pi pi-pencil" 
-              class="p-button-text p-button-sm edit-btn">
-            </button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-pencil"
+              class="p-button-text p-button-sm edit-btn"
+            ></button>
           </div>
-          
+
           <div class="card-content">
             <div class="security-items">
               <div class="security-item">
                 <div class="security-info">
                   <h4>Password</h4>
-                  <p>Last changed {{ currentUser?.passwordUpdated ? (currentUser?.passwordUpdated | date:'mediumDate') : 'Never' }}</p>
+                  <p>
+                    Last changed
+                    {{
+                      currentUser?.passwordUpdated
+                        ? (currentUser?.passwordUpdated | date : "mediumDate")
+                        : "Never"
+                    }}
+                  </p>
                 </div>
-                <button 
-                  pButton 
+                <button
+                  pButton
                   type="button"
-                  label="Change" 
-                  class="p-button-outlined p-button-sm">
-                </button>
+                  label="Change"
+                  class="p-button-outlined p-button-sm"
+                ></button>
               </div>
-              
+
               <div class="security-item">
                 <div class="security-info">
                   <h4>Two-Factor Authentication</h4>
                   <p>Add an extra layer of security</p>
                 </div>
-                <button 
-                  pButton 
-                  type="button" 
-                  label="Enable" 
-                  class="p-button-outlined p-button-sm">
-                </button>
+                <button
+                  pButton
+                  type="button"
+                  label="Enable"
+                  class="p-button-outlined p-button-sm"
+                ></button>
               </div>
             </div>
           </div>
@@ -153,25 +222,37 @@
               <h3>Your Statistics</h3>
             </div>
           </div>
-          
+
           <div class="card-content">
-            <div class="stats-grid">
+            <div *ngIf="!loading" class="stats-grid">
               <div class="stat-item">
-                <div class="stat-number">{{ currentUser?.boardsCount || '0' }}</div>
+                <div class="stat-number">
+                  {{ userStats?.boardsCount || "0" }}
+                </div>
                 <div class="stat-label">Boards Created</div>
               </div>
               <div class="stat-item">
-                <div class="stat-number">{{ currentUser?.tasksCount || '0' }}</div>
+                <div class="stat-number">
+                  {{ userStats?.tasksCount || "0" }}
+                </div>
                 <div class="stat-label">Tasks Completed</div>
               </div>
               <div class="stat-item">
-                <div class="stat-number">{{ currentUser?.projectsCount || '0' }}</div>
+                <div class="stat-number">
+                  {{ userStats?.projectsCount || "0" }}
+                </div>
                 <div class="stat-label">Projects</div>
               </div>
               <div class="stat-item">
-                <div class="stat-number">{{ currentUser?.collaborationsCount || '0' }}</div>
+                <div class="stat-number">
+                  {{ userStats?.collaborationsCount || "0" }}
+                </div>
                 <div class="stat-label">Collaborations</div>
               </div>
+            </div>
+            <div *ngIf="loading" class="loading-stats">
+              <i class="pi pi-spin pi-spinner"></i>
+              <p>Loading statistics...</p>
             </div>
           </div>
         </div>

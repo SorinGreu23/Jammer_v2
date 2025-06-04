@@ -1,6 +1,7 @@
 package com.example.jammer.domain.repository;
 
 import com.example.jammer.domain.model.Board;
+import com.example.jammer.api.dtos.board.BoardStatisticsResponse;
 
 import java.util.List;
 
@@ -10,4 +11,5 @@ public interface BoardRepository {
     void deleteById(Long boardId);
     Board update(Board board);
     Board findById(Long boardId);
+    List<BoardStatisticsResponse> getBoardStatistics(int userId);
 }

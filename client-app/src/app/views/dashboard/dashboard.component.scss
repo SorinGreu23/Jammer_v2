@@ -1,4 +1,5 @@
-body, .dashboard-background {
+body,
+.dashboard-background {
   position: fixed;
   top: 0;
   left: 0;
@@ -9,34 +10,45 @@ body, .dashboard-background {
   overflow: hidden;
 }
 
-body::before, .dashboard-background::before {
-  content: '';
+body::before,
+.dashboard-background::before {
+  content: "";
   position: absolute;
   top: -50%;
   left: -20%;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.6) 0%,
+    transparent 70%
+  );
   border-radius: 50%;
   animation: float 8s ease-in-out infinite;
   z-index: -1;
 }
 
-body::after, .dashboard-background::after {
-  content: '';
+body::after,
+.dashboard-background::after {
+  content: "";
   position: absolute;
   bottom: -30%;
   right: -10%;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(249, 115, 22, 0.5) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(249, 115, 22, 0.5) 0%,
+    transparent 70%
+  );
   border-radius: 50%;
   animation: float 6s ease-in-out infinite reverse;
   z-index: -1;
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) translateX(0px) scale(1);
   }
   33% {
@@ -49,7 +61,14 @@ body::after, .dashboard-background::after {
 
 .dashboard-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 25%, #2d1b69 50%, #1a1a1a 75%, #0c0c0c 100%);
+  background: linear-gradient(
+    135deg,
+    #0c0c0c 0%,
+    #1a1a1a 25%,
+    #2d1b69 50%,
+    #1a1a1a 75%,
+    #0c0c0c 100%
+  );
   position: relative;
   overflow: hidden;
   padding: 2rem;
@@ -65,13 +84,13 @@ body::after, .dashboard-background::after {
   height: 100%;
   z-index: 1;
   overflow: hidden;
-  
+
   .bg-circle {
     position: absolute;
     border-radius: 50%;
     opacity: 0.05;
     animation: float 8s ease-in-out infinite;
-    
+
     &.bg-circle-1 {
       width: 400px;
       height: 400px;
@@ -80,7 +99,7 @@ body::after, .dashboard-background::after {
       right: -10%;
       animation-delay: 0s;
     }
-    
+
     &.bg-circle-2 {
       width: 300px;
       height: 300px;
@@ -89,7 +108,7 @@ body::after, .dashboard-background::after {
       left: -8%;
       animation-delay: 3s;
     }
-    
+
     &.bg-circle-3 {
       width: 200px;
       height: 200px;
@@ -102,7 +121,8 @@ body::after, .dashboard-background::after {
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg) scale(1);
   }
   50% {
@@ -123,13 +143,13 @@ body::after, .dashboard-background::after {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 3rem;
-  
+
   .header-info {
     .brand-section {
       display: flex;
       align-items: center;
       gap: 1.5rem;
-      
+
       .logo {
         width: 50px;
         height: 50px;
@@ -139,13 +159,13 @@ body::after, .dashboard-background::after {
         align-items: center;
         justify-content: center;
         box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
-        
+
         .pi {
           font-size: 1.5rem;
           color: white;
         }
       }
-      
+
       .brand-title {
         font-size: 2.5rem;
         font-weight: 700;
@@ -157,7 +177,7 @@ body::after, .dashboard-background::after {
         -webkit-text-fill-color: transparent;
         background-clip: text;
       }
-      
+
       .brand-subtitle {
         color: rgba(255, 255, 255, 0.7);
         margin: 0.5rem 0 0;
@@ -165,7 +185,7 @@ body::after, .dashboard-background::after {
       }
     }
   }
-  
+
   .header-actions {
     .create-board-btn {
       background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
@@ -181,7 +201,11 @@ body::after, .dashboard-background::after {
       &:hover {
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 30px rgba(34, 197, 94, 0.4) !important;
-        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+        background: linear-gradient(
+          135deg,
+          #16a34a 0%,
+          #15803d 100%
+        ) !important;
       }
 
       &:active {
@@ -202,7 +226,7 @@ body::after, .dashboard-background::after {
   .section-header {
     margin-bottom: 2rem;
     text-align: center;
-    
+
     h2 {
       font-size: 2rem;
       font-weight: 600;
@@ -210,14 +234,14 @@ body::after, .dashboard-background::after {
       margin: 0 0 0.5rem;
       letter-spacing: -0.5px;
     }
-    
+
     p {
       color: rgba(255, 255, 255, 0.7);
       margin: 0;
       font-size: 1.1rem;
     }
   }
-  
+
   .boards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -236,19 +260,19 @@ body::after, .dashboard-background::after {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
   cursor: pointer;
-  
+
   &:hover {
     transform: translateY(-4px) scale(1.02);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
     border-color: rgba(255, 255, 255, 0.2);
   }
-  
+
   .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
-    
+
     h3 {
       font-size: 1.4rem;
       font-weight: 600;
@@ -256,7 +280,7 @@ body::after, .dashboard-background::after {
       margin: 0;
       letter-spacing: 0.5px;
     }
-    
+
     .card-icon {
       width: 40px;
       height: 40px;
@@ -266,19 +290,20 @@ body::after, .dashboard-background::after {
       align-items: center;
       justify-content: center;
       box-shadow: 0 2px 10px rgba(34, 197, 94, 0.3);
-      
+
       .pi {
         color: white;
         font-size: 1.2rem;
       }
     }
   }
-  
+
   .card-stats {
     display: flex;
     gap: 2rem;
     margin-bottom: 1.5rem;
-    
+    flex-wrap: wrap;
+
     .stat-item {
       .stat-number {
         font-size: 2.2rem;
@@ -286,12 +311,20 @@ body::after, .dashboard-background::after {
         color: #22c55e;
         margin-bottom: 0.3rem;
         line-height: 1;
-        
+
         &.pending {
           color: #f59e0b;
         }
+
+        &.completed {
+          color: #22c55e;
+        }
+
+        &.percentage {
+          color: #3b82f6;
+        }
       }
-      
+
       .stat-label {
         color: rgba(255, 255, 255, 0.7);
         font-size: 0.9rem;
@@ -300,24 +333,24 @@ body::after, .dashboard-background::after {
       }
     }
   }
-  
+
   .card-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
+
     .board-date {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       color: rgba(255, 255, 255, 0.6);
       font-size: 0.85rem;
-      
+
       .pi {
         font-size: 0.8rem;
       }
     }
-    
+
     .board-status {
       .status-badge {
         background: rgba(34, 197, 94, 0.2);
@@ -327,7 +360,7 @@ body::after, .dashboard-background::after {
         border-radius: 12px;
         font-size: 0.8rem;
         font-weight: 500;
-        
+
         &.active {
           background: rgba(34, 197, 94, 0.2);
           color: #22c55e;
@@ -344,7 +377,7 @@ body::after, .dashboard-background::after {
   justify-content: center;
   align-items: center;
   min-height: 400px;
-  
+
   .loading-card {
     text-align: center;
     background: rgba(255, 255, 255, 0.08);
@@ -354,23 +387,23 @@ body::after, .dashboard-background::after {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    
+
     .loading-icon {
       margin-bottom: 1.5rem;
-      
+
       .pi {
         font-size: 3rem;
         color: #22c55e;
       }
     }
-    
+
     h3 {
       font-size: 1.5rem;
       font-weight: 600;
       color: rgba(255, 255, 255, 0.95);
       margin: 0 0 0.5rem;
     }
-    
+
     p {
       color: rgba(255, 255, 255, 0.7);
       margin: 0;
@@ -385,7 +418,7 @@ body::after, .dashboard-background::after {
   justify-content: center;
   align-items: center;
   min-height: 400px;
-  
+
   .empty-card {
     text-align: center;
     background: rgba(255, 255, 255, 0.08);
@@ -396,30 +429,30 @@ body::after, .dashboard-background::after {
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     max-width: 500px;
-    
+
     .empty-icon {
       margin-bottom: 1.5rem;
-      
+
       .pi {
         font-size: 4rem;
         color: rgba(255, 255, 255, 0.3);
       }
     }
-    
+
     h3 {
       font-size: 2rem;
       font-weight: 600;
       color: rgba(255, 255, 255, 0.95);
       margin: 0 0 1rem;
     }
-    
+
     p {
       color: rgba(255, 255, 255, 0.7);
       margin: 0 0 2rem;
       font-size: 1.1rem;
       line-height: 1.6;
     }
-    
+
     .create-first-btn {
       background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
       border: none !important;
@@ -434,7 +467,11 @@ body::after, .dashboard-background::after {
       &:hover {
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 30px rgba(34, 197, 94, 0.4) !important;
-        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+        background: linear-gradient(
+          135deg,
+          #16a34a 0%,
+          #15803d 100%
+        ) !important;
       }
     }
   }
@@ -456,7 +493,7 @@ body::after, .dashboard-background::after {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     color: rgba(255, 255, 255, 0.95) !important;
     padding: 1.5rem !important;
-    
+
     .p-dialog-title {
       font-weight: 600 !important;
       font-size: 1.2rem !important;
@@ -524,7 +561,7 @@ body::after, .dashboard-background::after {
     background: transparent !important;
     padding: 0.75rem 1.5rem !important;
     border-radius: 10px !important;
-    
+
     &:hover:not(:disabled) {
       background: rgba(255, 255, 255, 0.1) !important;
       color: rgba(255, 255, 255, 0.9) !important;
@@ -540,7 +577,7 @@ body::after, .dashboard-background::after {
     padding: 0.75rem 1.5rem !important;
     border-radius: 10px !important;
     transition: all 0.3s ease !important;
-    
+
     &:hover:not(:disabled) {
       background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
       transform: translateY(-1px) !important;
@@ -571,7 +608,7 @@ body::after, .dashboard-background::after {
     padding: 1rem;
     padding-top: 80px;
   }
-  
+
   .dashboard-header {
     flex-direction: column;
     align-items: center;
@@ -581,37 +618,37 @@ body::after, .dashboard-background::after {
     .header-info .brand-section {
       flex-direction: column;
       gap: 1rem;
-      
+
       .brand-title {
         font-size: 2rem;
       }
     }
   }
-  
+
   .boards-grid {
     grid-template-columns: 1fr !important;
     gap: 1rem;
   }
-  
+
   .board-card {
     .card-stats {
       gap: 1.5rem;
-      
+
       .stat-item .stat-number {
         font-size: 1.8rem;
       }
     }
   }
-  
+
   .empty-card,
   .loading-card {
     padding: 2rem !important;
     margin: 0 1rem;
-    
+
     h3 {
       font-size: 1.5rem !important;
     }
-    
+
     p {
       font-size: 1rem !important;
     }
@@ -622,17 +659,17 @@ body::after, .dashboard-background::after {
   .dashboard-header .header-info .brand-section .brand-title {
     font-size: 1.8rem;
   }
-  
+
   .board-card {
     padding: 1.2rem;
-    
+
     .card-header h3 {
       font-size: 1.2rem;
     }
-    
+
     .card-stats {
       gap: 1rem;
-      
+
       .stat-item .stat-number {
         font-size: 1.5rem;
       }

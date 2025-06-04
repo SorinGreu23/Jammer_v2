@@ -31,8 +31,8 @@ public class TaskRepositoryImpl implements TaskRepository {
     private Task insert(Task task) {
         String sql = """
             INSERT INTO [Workspace].[Tasks]
-                ([BoardId], [Name], [Description], [CreatedAt], [Status])
-            VALUES (?, ?, ?, ?, ?)
+                ([BoardId], [Name], [Description], [CreatedAt], [Status], [UserId])
+            VALUES (?, ?, ?, ?, ?, ?)
             """;
         try (Connection conn = connectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -42,6 +42,7 @@ public class TaskRepositoryImpl implements TaskRepository {
             ps.setString(3, task.getDescription());
             ps.setDate(4, new java.sql.Date(System.currentTimeMillis()));
             ps.setString(5, task.getStatus());
+            ps.setInt(6, task.getUserId());
 
             int affected = ps.executeUpdate();
             if (affected == 0) {
@@ -65,7 +66,7 @@ public class TaskRepositoryImpl implements TaskRepository {
     @Override
     public List<Task> findByBoardId(Integer boardId) {
         String sql = """
-            SELECT [Id], [BoardId], [Name], [Description], [CreatedAt], [UpdatedAt], [Status]
+            SELECT [Id], [BoardId], [Name], [Description], [CreatedAt], [UpdatedAt], [Status], [UserId]
               FROM [Workspace].[Tasks]
              WHERE [BoardId] = ?
             """;
@@ -88,7 +89,7 @@ public class TaskRepositoryImpl implements TaskRepository {
     @Override
     public Task findById(Integer id) {
         String sql = """
-            SELECT [Id], [BoardId], [Name], [Description], [CreatedAt], [UpdatedAt], [Status]
+            SELECT [Id], [BoardId], [Name], [Description], [CreatedAt], [UpdatedAt], [Status], [UserId]
               FROM [Workspace].[Tasks]
              WHERE [Id] = ?
             """;
@@ -199,6 +200,7 @@ public class TaskRepositoryImpl implements TaskRepository {
         task.setCreatedAt(rs.getDate("CreatedAt"));
         task.setUpdatedAt(rs.getDate("UpdatedAt"));
         task.setStatus(rs.getString("Status"));
+        task.setUserId(rs.getInt("UserId"));
         return task;
     }
 }

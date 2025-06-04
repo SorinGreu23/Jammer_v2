@@ -41,8 +41,16 @@ export interface TaskResponse {
   userId: number;
 }
 
+export interface BoardStatistics {
+  boardId: number;
+  boardName: string;
+  totalTasks: number;
+  completedTasks: number;
+  completionPercentage: number;
+}
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BoardService {
   private readonly API_URL = 'http://localhost:8080/api';
@@ -51,31 +59,58 @@ export class BoardService {
 
   getBoardsByUserId(userId: number): Observable<Board[]> {
     return this.http.get<Board[]>(`${this.API_URL}/boards/user/${userId}`, {
-      withCredentials: true
+      withCredentials: true,
     });
+  }
+
+  getBoardStatistics(userId: number): Observable<BoardStatistics[]> {
+    return this.http.get<BoardStatistics[]>(
+      `${this.API_URL}/boards/user/${userId}/statistics`,
+      {
+        withCredentials: true,
+      }
+    );
   }
 
   getTasksByBoardId(boardId: number): Observable<Task[]> {
     return this.http.get<Task[]>(`${this.API_URL}/boards/${boardId}/tasks`, {
-      withCredentials: true
+      withCredentials: true,
     });
   }
 
   createBoard(request: CreateBoardRequest): Observable<CreateBoardResponse> {
-    return this.http.post<CreateBoardResponse>(`${this.API_URL}/boards`, request, {
-      withCredentials: true
-    });
+    return this.http.post<CreateBoardResponse>(
+      `${this.API_URL}/boards`,
+      request,
+      {
+        withCredentials: true,
+      }
+    );
   }
 
-  createTask(boardId: number, request: CreateTaskRequest): Observable<TaskResponse> {
-    return this.http.post<TaskResponse>(`${this.API_URL}/boards/${boardId}/tasks`, request, {
-      withCredentials: true
-    });
+  createTask(
+    boardId: number,
+    request: CreateTaskRequest
+  ): Observable<TaskResponse> {
+    return this.http.post<TaskResponse>(
+      `${this.API_URL}/boards/${boardId}/tasks`,
+      request,
+      {
+        withCredentials: true,
+      }
+    );
   }
 
-  updateTask(taskId: number, request: UpdateTaskRequest): Observable<TaskResponse> {
-    return this.http.put<TaskResponse>(`${this.API_URL}/tasks/${taskId}`, request, {
-      withCredentials: true
-    });
+  updateTask(
+    taskId: number,
+    request: UpdateTaskRequest
+  ): Observable<TaskResponse> {
+    return this.http.put<TaskResponse>(
+      `${this.API_URL}/tasks/${taskId}`,
+      request,
+      {
+        withCredentials: true,
+      }
+    );
   }
-} 
+}

@@ -34,6 +34,10 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
                 while (rs.next()) {
                     workspaces.add(mapRow(rs));
                 }
+                if (workspaces.isEmpty()) {
+                    // If no workspace exists, create one
+                    return save(userId);
+                }
                 return workspaces.getFirst();
             }
         } catch (SQLException e) {
@@ -51,6 +55,34 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
 
     @Override
     public Workspace save(int userId) {
-        return null;
+        String sql = """
+                INSERT INTO [Workspace].[Workspaces] ([UserId], [Name])
+                VALUES (?, ?)
+                """;
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, userId);
+            ps.setString(2, "My Workspace"); // Default workspace name
+
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Creating workspace failed, no rows affected.");
+            }
+
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    Workspace workspace = new Workspace();
+                    workspace.setId(generatedKeys.getInt(1));
+                    workspace.setUserId(userId);
+                    workspace.setName("My Workspace");
+                    return workspace;
+                } else {
+                    throw new SQLException("Creating workspace failed, no ID obtained.");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -5,7 +5,11 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { Router } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
-import { BoardService, CreateBoardRequest } from '../../shared/services/board.service';
+import {
+  BoardService,
+  CreateBoardRequest,
+  BoardStatistics,
+} from '../../shared/services/board.service';
 import { Board } from '../../shared/models/board.model';
 import { Task } from '../../shared/models/task.model';
 import { forkJoin } from 'rxjs';
@@ -13,6 +17,8 @@ import { forkJoin } from 'rxjs';
 export interface BoardWithTasks extends Board {
   taskCount: number;
   pendingTasks: number;
+  completedTasks: number;
+  completionPercentage: number;
 }
 
 @Component({
@@ -20,13 +26,13 @@ export interface BoardWithTasks extends Board {
   standalone: true,
   imports: [CommonModule, ButtonModule, DialogModule, InputTextModule],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
   title = 'Dashboard - Jammer';
   currentUser: any;
   currentDate = new Date();
-  
+
   boards: BoardWithTasks[] = [];
   loading = true;
 
@@ -43,58 +49,47 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
-    if (this.currentUser && this.currentUser.userId) {
+    if (this.currentUser) {
       this.loadBoards();
     }
   }
 
   loadBoards(): void {
     this.loading = true;
-    
-    this.boardService.getBoardsByUserId(this.currentUser.userId).subscribe({
-      next: (boards: Board[]) => {
-        if (boards.length > 0) {
-          // Get task counts for each board
-          const taskRequests = boards.map(board => 
-            this.boardService.getTasksByBoardId(board.id)
-          );
-          
-          forkJoin(taskRequests).subscribe({
-            next: (taskArrays: Task[][]) => {
-              this.boards = boards.map((board, index) => {
-                const tasks = taskArrays[index];
-                const pendingTasks = tasks.filter(task => 
-                  task.status && !['completed', 'done'].includes(task.status.toLowerCase())
-                ).length;
-                
-                return {
-                  ...board,
-                  taskCount: tasks.length,
-                  pendingTasks: pendingTasks
-                };
-              });
-              this.loading = false;
-            },
-            error: (error) => {
-              console.error('Error loading tasks:', error);
-              // Still show boards even if tasks fail to load
-              this.boards = boards.map(board => ({
-                ...board,
-                taskCount: 0,
-                pendingTasks: 0
-              }));
-              this.loading = false;
-            }
-          });
-        } else {
-          this.boards = [];
-          this.loading = false;
-        }
+
+    if (!this.currentUser?.userId) {
+      this.loading = false;
+      return;
+    }
+
+    // Get both boards and their statistics
+    forkJoin({
+      boards: this.boardService.getBoardsByUserId(this.currentUser.userId),
+      stats: this.boardService.getBoardStatistics(this.currentUser.userId),
+    }).subscribe({
+      next: ({ boards, stats }) => {
+        // Merge board info with statistics
+        this.boards = boards.map((board) => {
+          const boardStats = stats.find((s) => s.boardId === board.id) || {
+            totalTasks: 0,
+            completedTasks: 0,
+            completionPercentage: 0,
+          };
+
+          return {
+            ...board,
+            taskCount: boardStats.totalTasks,
+            pendingTasks: boardStats.totalTasks - boardStats.completedTasks,
+            completedTasks: boardStats.completedTasks,
+            completionPercentage: boardStats.completionPercentage,
+          };
+        });
+        this.loading = false;
       },
       error: (error) => {
         console.error('Error loading boards:', error);
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -124,7 +119,7 @@ export class DashboardComponent implements OnInit {
 
     const request: CreateBoardRequest = {
       name: this.newBoardName.trim(),
-      userId: this.currentUser.userId
+      userId: this.currentUser.userId,
     };
 
     this.boardService.createBoard(request).subscribe({
@@ -138,7 +133,7 @@ export class DashboardComponent implements OnInit {
         console.error('Error creating board:', error);
         this.creatingBoard = false;
         // You could add a toast notification here for better UX
-      }
+      },
     });
   }
 
