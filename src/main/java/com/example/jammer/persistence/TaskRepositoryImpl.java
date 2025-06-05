@@ -59,7 +59,13 @@ public class TaskRepositoryImpl implements TaskRepository {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error inserting task", e);
+            if (e.getErrorCode() == 547) { // Foreign key violation
+                throw new RuntimeException("Referenced board or user does not exist.", e);
+            } else if (e.getErrorCode() == 2627) { // Unique constraint violation
+                throw new RuntimeException("Task with these details already exists.", e);
+            } else {
+                throw new RuntimeException("Error inserting task: " + e.getMessage(), e);
+            }
         }
     }
 
@@ -129,12 +135,16 @@ public class TaskRepositoryImpl implements TaskRepository {
 
             int affected = ps.executeUpdate();
             if (affected == 0) {
-                throw new RuntimeException("Updating task failed, no rows affected.");
+                throw new RuntimeException("Task not found with ID: " + task.getId());
             }
             task.setUpdatedAt(new java.sql.Date(System.currentTimeMillis()));
             return task;
         } catch (SQLException e) {
-            throw new RuntimeException("Error updating task", e);
+            if (e.getErrorCode() == 547) { // Foreign key violation
+                throw new RuntimeException("Referenced board or user does not exist.", e);
+            } else {
+                throw new RuntimeException("Error updating task: " + e.getMessage(), e);
+            }
         }
     }
 
@@ -147,10 +157,14 @@ public class TaskRepositoryImpl implements TaskRepository {
             ps.setInt(1, id);
             int affected = ps.executeUpdate();
             if (affected == 0) {
-                throw new RuntimeException("Deleting task failed, no rows affected.");
+                throw new RuntimeException("Task not found with ID: " + id);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error deleting task", e);
+            if (e.getErrorCode() == 547) { // Foreign key violation
+                throw new RuntimeException("Cannot delete task due to existing references.", e);
+            } else {
+                throw new RuntimeException("Error deleting task: " + e.getMessage(), e);
+            }
         }
     }
 

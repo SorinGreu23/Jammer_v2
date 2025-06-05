@@ -8,6 +8,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
 import {
   DragDropModule,
@@ -27,6 +28,7 @@ import {
   BoardMember,
   InviteUserRequest,
 } from '../../shared/models/board-member.model';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-board',
@@ -41,8 +43,9 @@ import {
     InputTextarea,
     ToastModule,
     DragDropModule,
+    ConfirmDialogModule,
   ],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })
@@ -81,12 +84,16 @@ export class BoardComponent implements OnInit {
   inviteUsernameOrEmail = '';
   invitingUser = false;
 
+  // Member removal tracking
+  removingMemberId: number | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private boardService: BoardService,
     private authService: AuthService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -254,7 +261,7 @@ export class BoardComponent implements OnInit {
         this.closeCreateTaskModal();
         // Refresh the tasks list
         this.loadTasks();
-        
+
         this.messageService.add({
           severity: 'success',
           summary: 'Task Created',
@@ -263,25 +270,25 @@ export class BoardComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('❌ Error creating task:', error);
-        
+
         // Extract meaningful error message from server response
         let errorMessage = 'Failed to create task. Please try again.';
         let summary = 'Create Failed';
-        
+
         if (error?.error?.message) {
           errorMessage = error.error.message;
-          
+
           if (error.status === 400) {
             summary = 'Invalid Task Data';
           }
         }
-        
+
         this.messageService.add({
           severity: 'error',
           summary: summary,
           detail: errorMessage,
         });
-        
+
         this.creatingTask = false;
       },
     });
@@ -311,7 +318,7 @@ export class BoardComponent implements OnInit {
           this.newTaskDescription.trim() || undefined;
 
         this.closeCreateTaskModal();
-        
+
         this.messageService.add({
           severity: 'success',
           summary: 'Task Updated',
@@ -320,28 +327,29 @@ export class BoardComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('❌ Error updating task:', error);
-        
+
         // Extract meaningful error message from server response
         let errorMessage = 'Failed to update task. Please try again.';
         let summary = 'Update Failed';
-        
+
         if (error?.error?.message) {
           errorMessage = error.error.message;
-          
+
           if (error.status === 404) {
             summary = 'Task Not Found';
-            errorMessage = 'The task could not be found. It may have been deleted.';
+            errorMessage =
+              'The task could not be found. It may have been deleted.';
           } else if (error.status === 400) {
             summary = 'Invalid Task Data';
           }
         }
-        
+
         this.messageService.add({
           severity: 'error',
           summary: summary,
           detail: errorMessage,
         });
-        
+
         this.creatingTask = false;
       },
     });
@@ -370,34 +378,35 @@ export class BoardComponent implements OnInit {
     this.boardService.deleteTask(task.id).subscribe({
       next: () => {
         console.log('✅ Task deleted successfully:', task.name);
-        
+
         // Remove task from local arrays
-        this.tasks = this.tasks.filter(t => t.id !== task.id);
+        this.tasks = this.tasks.filter((t) => t.id !== task.id);
         this.categorizeTasks();
-        
+
         this.messageService.add({
           severity: 'success',
           summary: 'Task Deleted',
           detail: `Task "${task.name}" has been deleted`,
         });
-        
+
         this.deletingTaskId = null;
       },
       error: (error: any) => {
         console.error('❌ Error deleting task:', error);
-        
+
         // Extract meaningful error message from server response
         let errorMessage = 'Failed to delete task. Please try again.';
         let severity = 'error';
         let summary = 'Delete Failed';
-        
+
         if (error?.error?.message) {
           errorMessage = error.error.message;
-          
+
           // Customize message based on error type
           if (error.status === 404) {
             summary = 'Task Not Found';
-            errorMessage = 'The task could not be found. It may have already been deleted.';
+            errorMessage =
+              'The task could not be found. It may have already been deleted.';
           } else if (error.status === 403) {
             summary = 'Delete Not Allowed';
             severity = 'warn';
@@ -406,13 +415,13 @@ export class BoardComponent implements OnInit {
             severity = 'warn';
           }
         }
-        
+
         this.messageService.add({
           severity: severity as any,
           summary: summary,
           detail: errorMessage,
         });
-        
+
         this.deletingTaskId = null;
       },
     });
@@ -576,6 +585,91 @@ export class BoardComponent implements OnInit {
       },
       complete: () => {
         this.invitingUser = false;
+      },
+    });
+  }
+
+  isOwner(): boolean {
+    if (!this.board || !this.currentUser) return false;
+    // Find the current user in the board members list and check if they are an admin
+    const currentMember = this.boardMembers.find(
+      (m) => m.userId === this.currentUser?.userId
+    );
+    return currentMember?.isAdmin || false;
+  }
+
+  removeMember(member: BoardMember, event: Event): void {
+    event.stopPropagation();
+
+    if (!this.isOwner()) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Only board owners can remove members',
+      });
+      return;
+    }
+
+    this.confirmationService.confirm({
+      message: `Are you sure you want to remove ${member.username} from this board?`,
+      header: 'Remove Member',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.removingMemberId = member.userId;
+        this.boardService
+          .removeBoardMember(this.boardId, member.userId)
+          .subscribe({
+            next: () => {
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Member removed successfully',
+              });
+              this.loadBoardMembers();
+            },
+            error: (error) => {
+              console.error('Error removing member:', error);
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to remove member',
+              });
+            },
+            complete: () => {
+              this.removingMemberId = null;
+            },
+          });
+      },
+    });
+  }
+
+  leaveBoard(event: Event): void {
+    event.stopPropagation();
+
+    this.confirmationService.confirm({
+      message:
+        'Are you sure you want to leave this board? You will lose access to all tasks and updates.',
+      header: 'Leave Board',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.boardService.leaveBoard(this.boardId).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'You have left the board successfully',
+            });
+            this.router.navigate(['/dashboard']);
+          },
+          error: (error) => {
+            console.error('Error leaving board:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to leave the board',
+            });
+          },
+        });
       },
     });
   }

@@ -16,6 +16,7 @@ import com.example.jammer.application.board.GetBoardMembersUseCase;
 import com.example.jammer.application.board.AcceptBoardInvitationUseCase;
 import com.example.jammer.domain.model.Board;
 import com.example.jammer.domain.model.BoardMember;
+import com.example.jammer.domain.repository.BoardMemberRepository;
 import com.example.jammer.api.dtos.board.BoardStatisticsResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,7 @@ public class BoardController {
     private final InviteUserToBoardUseCase inviteUserToBoardUseCase;
     private final GetBoardMembersUseCase getBoardMembersUseCase;
     private final AcceptBoardInvitationUseCase acceptBoardInvitationUseCase;
+    private final BoardMemberRepository boardMemberRepository;
 
     public BoardController(
             CreateBoardUseCase createBoardUseCase,
@@ -44,8 +46,8 @@ public class BoardController {
             GetBoardStatisticsUseCase getBoardStatisticsUseCase,
             InviteUserToBoardUseCase inviteUserToBoardUseCase,
             GetBoardMembersUseCase getBoardMembersUseCase,
-            AcceptBoardInvitationUseCase acceptBoardInvitationUseCase
-    ) {
+            AcceptBoardInvitationUseCase acceptBoardInvitationUseCase,
+            BoardMemberRepository boardMemberRepository) {
         this.createBoardUseCase = createBoardUseCase;
         this.getBoardsByUserUseCase = getBoardsByUserUseCase;
         this.updateBoardUseCase = updateBoardUseCase;
@@ -54,12 +56,13 @@ public class BoardController {
         this.inviteUserToBoardUseCase = inviteUserToBoardUseCase;
         this.getBoardMembersUseCase = getBoardMembersUseCase;
         this.acceptBoardInvitationUseCase = acceptBoardInvitationUseCase;
+        this.boardMemberRepository = boardMemberRepository;
     }
 
     @DeleteMapping("/{boardId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteBoard(@PathVariable Long boardId) {
-        deleteBoardUseCase.execute(boardId);
+    public void deleteBoard(@PathVariable Long boardId, @RequestHeader("X-User-Id") Integer userId) {
+        deleteBoardUseCase.execute(boardId, userId);
     }
 
     @PostMapping
@@ -121,5 +124,40 @@ public class BoardController {
             @RequestBody AcceptInvitationRequest request,
             @RequestHeader("X-User-Id") Integer userId) {
         return acceptBoardInvitationUseCase.execute(request.getToken(), userId);
+    }
+
+    @DeleteMapping("/{boardId}/members/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeBoardMember(
+            @PathVariable Integer boardId, 
+            @PathVariable Integer userId,
+            @RequestHeader("X-User-Id") Integer currentUserId) {
+        // Check if current user is a board admin
+        if (!boardMemberRepository.isUserBoardAdmin(currentUserId, boardId)) {
+            throw new RuntimeException("Only board admins can remove members");
+        }
+        
+        // Check if trying to remove self
+        if (userId.equals(currentUserId)) {
+            throw new RuntimeException("Cannot remove yourself. Use the leave board endpoint instead.");
+        }
+        
+        boardMemberRepository.removeBoardMember(userId, boardId);
+    }
+
+    @DeleteMapping("/{boardId}/leave")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void leaveBoard(@PathVariable Integer boardId, @RequestHeader("X-User-Id") Integer userId) {
+        // Check if user is a member of the board
+        if (!boardMemberRepository.isUserBoardMember(userId, boardId)) {
+            throw new RuntimeException("User is not a member of this board");
+        }
+        
+        // Check if user is not the owner (admin)
+        if (boardMemberRepository.isUserBoardAdmin(userId, boardId)) {
+            throw new RuntimeException("Board owner cannot leave the board. Please delete the board instead.");
+        }
+        
+        boardMemberRepository.removeBoardMember(userId, boardId);
     }
 }

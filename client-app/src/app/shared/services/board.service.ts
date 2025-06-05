@@ -9,10 +9,12 @@ import {
   InviteUserResponse,
 } from '../models/board-member.model';
 import { AuthService } from './auth.service';
+import { map } from 'rxjs/operators';
 
 export interface CreateBoardRequest {
   name: string;
   userId: number;
+  username: string;
 }
 
 export interface CreateBoardResponse {
@@ -155,6 +157,14 @@ export class BoardService {
     );
   }
 
+  hasBoardMembers(boardId: number): Observable<boolean> {
+    return this.getBoardMembers(boardId).pipe(
+      map(
+        (members) => members.filter((m) => m.status === 'ACCEPTED').length > 0
+      )
+    );
+  }
+
   inviteUserToBoard(
     boardId: number,
     request: InviteUserRequest
@@ -182,5 +192,29 @@ export class BoardService {
         withCredentials: true,
       }
     );
+  }
+
+  deleteBoard(boardId: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/boards/${boardId}`, {
+      headers: this.getHeaders(),
+      withCredentials: true,
+    });
+  }
+
+  removeBoardMember(boardId: number, userId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.API_URL}/boards/${boardId}/members/${userId}`,
+      {
+        headers: this.getHeaders(),
+        withCredentials: true,
+      }
+    );
+  }
+
+  leaveBoard(boardId: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/boards/${boardId}/leave`, {
+      headers: this.getHeaders(),
+      withCredentials: true,
+    });
   }
 }

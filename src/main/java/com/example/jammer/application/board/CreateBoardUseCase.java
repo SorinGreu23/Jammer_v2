@@ -6,6 +6,7 @@ import com.example.jammer.domain.model.Board;
 import com.example.jammer.domain.model.Workspace;
 import com.example.jammer.domain.repository.BoardRepository;
 import com.example.jammer.domain.repository.WorkspaceRepository;
+import com.example.jammer.domain.repository.BoardMemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +17,15 @@ import java.time.LocalDate;
 public class CreateBoardUseCase {
     private final BoardRepository boardRepository;
     private final WorkspaceRepository workspaceRepository;
+    private final BoardMemberRepository boardMemberRepository;
 
-    public CreateBoardUseCase(BoardRepository boardRepository, WorkspaceRepository workspaceRepository) {
+    public CreateBoardUseCase(
+            BoardRepository boardRepository, 
+            WorkspaceRepository workspaceRepository,
+            BoardMemberRepository boardMemberRepository) {
         this.boardRepository = boardRepository;
         this.workspaceRepository = workspaceRepository;
+        this.boardMemberRepository = boardMemberRepository;
     }
 
     @Transactional
@@ -44,6 +50,14 @@ public class CreateBoardUseCase {
         );
 
         Board saved = boardRepository.save(newBoard);
+
+        // Add the creator as an admin member
+        boardMemberRepository.inviteUserToBoard(
+            request.getUsername(), // Use the username from the request
+            saved.getId().intValue(),
+            request.getUserId()
+        );
+
         return new CreateBoardResponse(
                 saved.getId(),
                 saved.getName(),

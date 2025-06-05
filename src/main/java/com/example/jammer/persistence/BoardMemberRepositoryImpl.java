@@ -132,27 +132,6 @@ public class BoardMemberRepositoryImpl implements BoardMemberRepository {
     }
 
     @Override
-    public boolean isUserBoardMember(Integer userId, Integer boardId) {
-        String sql = """
-            SELECT 1 FROM [Workspace].[BoardMembers] 
-            WHERE [UserId] = ? AND [BoardId] = ? AND [Status] = 'ACCEPTED'
-            """;
-        
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
-            ps.setInt(1, userId);
-            ps.setInt(2, boardId);
-            
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error checking board membership", e);
-        }
-    }
-
-    @Override
     public boolean isUserBoardAdmin(Integer userId, Integer boardId) {
         String sql = """
             SELECT 1 FROM [Workspace].[BoardMembers] 
@@ -170,6 +149,27 @@ public class BoardMemberRepositoryImpl implements BoardMemberRepository {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error checking board admin status", e);
+        }
+    }
+
+    @Override
+    public boolean isUserBoardMember(Integer userId, Integer boardId) {
+        String sql = """
+            SELECT 1 FROM [Workspace].[BoardMembers] 
+            WHERE [UserId] = ? AND [BoardId] = ? AND [Status] = 'ACCEPTED'
+            """;
+        
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            ps.setInt(2, boardId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error checking board member status", e);
         }
     }
 

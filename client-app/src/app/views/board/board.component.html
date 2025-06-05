@@ -9,15 +9,16 @@
   <div class="board-content">
     <!-- Board Header -->
     <div class="board-header">
-      <button 
-        pButton 
-        type="button" 
-        icon="pi pi-arrow-left" 
+      <button
+        pButton
+        type="button"
+        icon="pi pi-arrow-left"
         class="back-button"
-        (click)="goBackToDashboard()">
+        (click)="goBackToDashboard()"
+      >
         Back to Dashboard
       </button>
-      
+
       <div class="header-info" *ngIf="board">
         <div class="brand-section">
           <div class="logo">
@@ -26,32 +27,34 @@
           <div class="board-details">
             <h1 class="board-title">{{ board.name }}</h1>
             <p class="board-subtitle">
-              Created {{ board.createdAt | date:'MMM d, y' }} • {{ tasks.length }} total tasks
+              Created {{ board.createdAt | date : "MMM d, y" }} •
+              {{ tasks.length }} total tasks
             </p>
           </div>
-          
+
           <!-- Board Actions -->
           <div class="board-actions">
-            <button 
-              pButton 
-              type="button" 
+            <button
+              pButton
+              type="button"
               icon="pi pi-users"
               label="Members"
               class="p-button-outlined members-btn"
               (click)="showMembersModal()"
-              title="View board members">
+              title="View board members"
+            >
               <span class="members-count">{{ boardMembers.length }}</span>
             </button>
-            
-            <button 
-              pButton 
-              type="button" 
+
+            <button
+              pButton
+              type="button"
               icon="pi pi-user-plus"
               label="Invite"
               class="invite-btn"
               (click)="showInviteModal()"
-              title="Invite members to board">
-            </button>
+              title="Invite members to board"
+            ></button>
           </div>
         </div>
       </div>
@@ -71,57 +74,69 @@
               <span class="task-count">{{ todoTasks.length }}</span>
             </div>
           </div>
-          <button 
-            pButton 
-            type="button" 
+          <button
+            pButton
+            type="button"
             icon="pi pi-plus"
             class="add-task-btn"
             (click)="openCreateTaskModal()"
-            title="Add new task">
-          </button>
+            title="Add new task"
+          ></button>
         </div>
-        <div 
+        <div
           class="task-list"
           cdkDropList
           id="todo-list"
           [cdkDropListData]="todoTasks"
-          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('todo'))">
-          <div 
-            class="task-card" 
+          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('todo'))"
+        >
+          <div
+            class="task-card"
             *ngFor="let task of todoTasks"
             cdkDrag
             [cdkDragData]="task"
             (cdkDragStarted)="onDragStarted($event)"
-            (cdkDragEnded)="onDragEnded($event)">
-            
+            (cdkDragEnded)="onDragEnded($event)"
+          >
             <div class="task-header">
               <h4>{{ task.name }}</h4>
               <div class="task-actions">
-                <button 
+                <button
                   class="edit-task-btn"
                   (click)="openEditTaskModal(task, $event)"
-                  title="Edit task">
+                  title="Edit task"
+                >
                   <i class="pi pi-pencil"></i>
                 </button>
-                <button 
+                <button
                   *ngIf="isTaskDeletable(task)"
                   class="delete-task-btn"
                   (click)="deleteTask(task, $event)"
                   [disabled]="deletingTaskId === task.id"
-                  title="Delete task">
+                  title="Delete task"
+                >
                   <i class="pi pi-trash" *ngIf="deletingTaskId !== task.id"></i>
-                  <i class="pi pi-spin pi-spinner" *ngIf="deletingTaskId === task.id"></i>
+                  <i
+                    class="pi pi-spin pi-spinner"
+                    *ngIf="deletingTaskId === task.id"
+                  ></i>
                 </button>
               </div>
             </div>
-            
-            <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+
+            <p *ngIf="task.description" class="task-description">
+              {{ task.description }}
+            </p>
             <div class="task-footer">
-              <span class="task-status todo-status">{{ task.status || 'TODO' }}</span>
-              <span class="task-date">{{ task.createdAt | date:'MMM d' }}</span>
+              <span class="task-status todo-status">{{
+                task.status || "TODO"
+              }}</span>
+              <span class="task-date">{{
+                task.createdAt | date : "MMM d"
+              }}</span>
             </div>
           </div>
-          
+
           <div class="empty-column" *ngIf="todoTasks.length === 0">
             <div class="empty-icon">
               <i class="pi pi-clock"></i>
@@ -145,48 +160,60 @@
             </div>
           </div>
         </div>
-        <div 
+        <div
           class="task-list"
           cdkDropList
           id="progress-list"
           [cdkDropListData]="inProgressTasks"
-          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('in-progress'))">
-          <div 
-            class="task-card" 
+          (cdkDropListDropped)="
+            onTaskDrop($event, getColumnStatus('in-progress'))
+          "
+        >
+          <div
+            class="task-card"
             *ngFor="let task of inProgressTasks"
             cdkDrag
             [cdkDragData]="task"
             (cdkDragStarted)="onDragStarted($event)"
-            (cdkDragEnded)="onDragEnded($event)">
-            
+            (cdkDragEnded)="onDragEnded($event)"
+          >
             <div class="task-header">
               <h4>{{ task.name }}</h4>
               <div class="task-actions">
-                <button 
+                <button
                   class="edit-task-btn"
                   (click)="openEditTaskModal(task, $event)"
-                  title="Edit task">
+                  title="Edit task"
+                >
                   <i class="pi pi-pencil"></i>
                 </button>
-                <button 
+                <button
                   *ngIf="isTaskDeletable(task)"
                   class="delete-task-btn"
                   (click)="deleteTask(task, $event)"
                   [disabled]="deletingTaskId === task.id"
-                  title="Delete task">
+                  title="Delete task"
+                >
                   <i class="pi pi-trash" *ngIf="deletingTaskId !== task.id"></i>
-                  <i class="pi pi-spin pi-spinner" *ngIf="deletingTaskId === task.id"></i>
+                  <i
+                    class="pi pi-spin pi-spinner"
+                    *ngIf="deletingTaskId === task.id"
+                  ></i>
                 </button>
               </div>
             </div>
-            
-            <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+
+            <p *ngIf="task.description" class="task-description">
+              {{ task.description }}
+            </p>
             <div class="task-footer">
               <span class="task-status progress-status">{{ task.status }}</span>
-              <span class="task-date">{{ task.createdAt | date:'MMM d' }}</span>
+              <span class="task-date">{{
+                task.createdAt | date : "MMM d"
+              }}</span>
             </div>
           </div>
-          
+
           <div class="empty-column" *ngIf="inProgressTasks.length === 0">
             <div class="empty-icon">
               <i class="pi pi-play"></i>
@@ -210,48 +237,58 @@
             </div>
           </div>
         </div>
-        <div 
+        <div
           class="task-list"
           cdkDropList
           id="review-list"
           [cdkDropListData]="reviewTasks"
-          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('review'))">
-          <div 
-            class="task-card" 
+          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('review'))"
+        >
+          <div
+            class="task-card"
             *ngFor="let task of reviewTasks"
             cdkDrag
             [cdkDragData]="task"
             (cdkDragStarted)="onDragStarted($event)"
-            (cdkDragEnded)="onDragEnded($event)">
-            
+            (cdkDragEnded)="onDragEnded($event)"
+          >
             <div class="task-header">
               <h4>{{ task.name }}</h4>
               <div class="task-actions">
-                <button 
+                <button
                   class="edit-task-btn"
                   (click)="openEditTaskModal(task, $event)"
-                  title="Edit task">
+                  title="Edit task"
+                >
                   <i class="pi pi-pencil"></i>
                 </button>
-                <button 
+                <button
                   *ngIf="isTaskDeletable(task)"
                   class="delete-task-btn"
                   (click)="deleteTask(task, $event)"
                   [disabled]="deletingTaskId === task.id"
-                  title="Delete task">
+                  title="Delete task"
+                >
                   <i class="pi pi-trash" *ngIf="deletingTaskId !== task.id"></i>
-                  <i class="pi pi-spin pi-spinner" *ngIf="deletingTaskId === task.id"></i>
+                  <i
+                    class="pi pi-spin pi-spinner"
+                    *ngIf="deletingTaskId === task.id"
+                  ></i>
                 </button>
               </div>
             </div>
-            
-            <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+
+            <p *ngIf="task.description" class="task-description">
+              {{ task.description }}
+            </p>
             <div class="task-footer">
               <span class="task-status review-status">{{ task.status }}</span>
-              <span class="task-date">{{ task.createdAt | date:'MMM d' }}</span>
+              <span class="task-date">{{
+                task.createdAt | date : "MMM d"
+              }}</span>
             </div>
           </div>
-          
+
           <div class="empty-column" *ngIf="reviewTasks.length === 0">
             <div class="empty-icon">
               <i class="pi pi-eye"></i>
@@ -275,48 +312,58 @@
             </div>
           </div>
         </div>
-        <div 
+        <div
           class="task-list"
           cdkDropList
           id="testing-list"
           [cdkDropListData]="testingTasks"
-          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('testing'))">
-          <div 
-            class="task-card" 
+          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('testing'))"
+        >
+          <div
+            class="task-card"
             *ngFor="let task of testingTasks"
             cdkDrag
             [cdkDragData]="task"
             (cdkDragStarted)="onDragStarted($event)"
-            (cdkDragEnded)="onDragEnded($event)">
-            
+            (cdkDragEnded)="onDragEnded($event)"
+          >
             <div class="task-header">
               <h4>{{ task.name }}</h4>
               <div class="task-actions">
-                <button 
+                <button
                   class="edit-task-btn"
                   (click)="openEditTaskModal(task, $event)"
-                  title="Edit task">
+                  title="Edit task"
+                >
                   <i class="pi pi-pencil"></i>
                 </button>
-                <button 
+                <button
                   *ngIf="isTaskDeletable(task)"
                   class="delete-task-btn"
                   (click)="deleteTask(task, $event)"
                   [disabled]="deletingTaskId === task.id"
-                  title="Delete task">
+                  title="Delete task"
+                >
                   <i class="pi pi-trash" *ngIf="deletingTaskId !== task.id"></i>
-                  <i class="pi pi-spin pi-spinner" *ngIf="deletingTaskId === task.id"></i>
+                  <i
+                    class="pi pi-spin pi-spinner"
+                    *ngIf="deletingTaskId === task.id"
+                  ></i>
                 </button>
               </div>
             </div>
-            
-            <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+
+            <p *ngIf="task.description" class="task-description">
+              {{ task.description }}
+            </p>
             <div class="task-footer">
               <span class="task-status testing-status">{{ task.status }}</span>
-              <span class="task-date">{{ task.createdAt | date:'MMM d' }}</span>
+              <span class="task-date">{{
+                task.createdAt | date : "MMM d"
+              }}</span>
             </div>
           </div>
-          
+
           <div class="empty-column" *ngIf="testingTasks.length === 0">
             <div class="empty-icon">
               <i class="pi pi-cog"></i>
@@ -326,8 +373,6 @@
           </div>
         </div>
       </div>
-
-      
 
       <!-- Done Column -->
       <div class="task-column done-column">
@@ -342,48 +387,58 @@
             </div>
           </div>
         </div>
-        <div 
+        <div
           class="task-list"
           cdkDropList
           id="done-list"
           [cdkDropListData]="doneTasks"
-          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('done'))">
-          <div 
-            class="task-card" 
+          (cdkDropListDropped)="onTaskDrop($event, getColumnStatus('done'))"
+        >
+          <div
+            class="task-card"
             *ngFor="let task of doneTasks"
             cdkDrag
             [cdkDragData]="task"
             (cdkDragStarted)="onDragStarted($event)"
-            (cdkDragEnded)="onDragEnded($event)">
-            
+            (cdkDragEnded)="onDragEnded($event)"
+          >
             <div class="task-header">
               <h4>{{ task.name }}</h4>
               <div class="task-actions">
-                <button 
+                <button
                   class="edit-task-btn"
                   (click)="openEditTaskModal(task, $event)"
-                  title="Edit task">
+                  title="Edit task"
+                >
                   <i class="pi pi-pencil"></i>
                 </button>
-                <button 
+                <button
                   *ngIf="isTaskDeletable(task)"
                   class="delete-task-btn"
                   (click)="deleteTask(task, $event)"
                   [disabled]="deletingTaskId === task.id"
-                  title="Delete task">
+                  title="Delete task"
+                >
                   <i class="pi pi-trash" *ngIf="deletingTaskId !== task.id"></i>
-                  <i class="pi pi-spin pi-spinner" *ngIf="deletingTaskId === task.id"></i>
+                  <i
+                    class="pi pi-spin pi-spinner"
+                    *ngIf="deletingTaskId === task.id"
+                  ></i>
                 </button>
               </div>
             </div>
-            
-            <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+
+            <p *ngIf="task.description" class="task-description">
+              {{ task.description }}
+            </p>
             <div class="task-footer">
               <span class="task-status done-status">{{ task.status }}</span>
-              <span class="task-date">{{ task.createdAt | date:'MMM d' }}</span>
+              <span class="task-date">{{
+                task.createdAt | date : "MMM d"
+              }}</span>
             </div>
           </div>
-          
+
           <div class="empty-column" *ngIf="doneTasks.length === 0">
             <div class="empty-icon">
               <i class="pi pi-check"></i>
@@ -414,198 +469,229 @@
 </div>
 
 <!-- Create/Edit Task Modal -->
-<p-dialog 
-  [header]="isEditMode ? 'Edit Task' : 'Create New Task'" 
-  [(visible)]="showCreateTaskModal" 
-  [modal]="true" 
-  [style]="{width: '500px'}"
+<p-dialog
+  [header]="isEditMode ? 'Edit Task' : 'Create New Task'"
+  [(visible)]="showCreateTaskModal"
+  [modal]="true"
+  [style]="{ width: '500px' }"
   [closable]="true"
   [draggable]="false"
   styleClass="custom-modal"
-  (onHide)="closeCreateTaskModal()">
-  
+  (onHide)="closeCreateTaskModal()"
+>
   <div class="create-task-form">
     <div class="form-field">
       <label for="taskName">Task Name *</label>
-      <input 
-        pInputText 
-        id="taskName" 
-        type="text" 
+      <input
+        pInputText
+        id="taskName"
+        type="text"
         [value]="newTaskName"
         (input)="newTaskName = $any($event.target).value"
         placeholder="Enter a descriptive task name"
         class="form-input"
         [disabled]="creatingTask"
-        (keyup.enter)="isEditMode ? updateTask() : createTask()">
+        (keyup.enter)="isEditMode ? updateTask() : createTask()"
+      />
     </div>
-    
+
     <div class="form-field">
       <label for="taskDescription">Description (Optional)</label>
-      <textarea 
-        pInputTextarea 
+      <textarea
+        pInputTextarea
         id="taskDescription"
         [value]="newTaskDescription"
         (input)="newTaskDescription = $any($event.target).value"
         placeholder="Add more details about this task..."
         rows="4"
         class="form-textarea"
-        [disabled]="creatingTask">
+        [disabled]="creatingTask"
+      >
       </textarea>
     </div>
-    
+
     <div class="form-info">
       <div class="info-icon">
         <i class="pi pi-info-circle"></i>
       </div>
-      <span>{{ isEditMode ? 'Task will maintain its current column' : 'Task will be created in the TODO column' }}</span>
+      <span>{{
+        isEditMode
+          ? "Task will maintain its current column"
+          : "Task will be created in the TODO column"
+      }}</span>
     </div>
   </div>
-  
+
   <ng-template pTemplate="footer">
     <div class="modal-footer">
-      <button 
-        pButton 
-        type="button" 
-        label="Cancel" 
+      <button
+        pButton
+        type="button"
+        label="Cancel"
         class="cancel-btn"
         (click)="closeCreateTaskModal()"
-        [disabled]="creatingTask">
-      </button>
-      <button 
-        pButton 
-        type="button" 
-        [label]="isEditMode ? 'Update Task' : 'Create Task'" 
+        [disabled]="creatingTask"
+      ></button>
+      <button
+        pButton
+        type="button"
+        [label]="isEditMode ? 'Update Task' : 'Create Task'"
         [icon]="isEditMode ? 'pi pi-check' : 'pi pi-plus'"
         class="create-btn"
         (click)="isEditMode ? updateTask() : createTask()"
         [disabled]="!newTaskName.trim() || creatingTask"
-        [loading]="creatingTask">
-      </button>
+        [loading]="creatingTask"
+      ></button>
     </div>
   </ng-template>
 </p-dialog>
 
 <!-- Invite Member Modal -->
-<p-dialog 
-  header="Invite Member to Board" 
-  [(visible)]="showInviteModalVisible" 
-  [modal]="true" 
-  [style]="{width: '500px'}"
+<p-dialog
+  header="Invite Member to Board"
+  [(visible)]="showInviteModalVisible"
+  [modal]="true"
+  [style]="{ width: '500px' }"
   [closable]="true"
   [draggable]="false"
   styleClass="custom-modal"
-  (onHide)="closeInviteModal()">
-  
+  (onHide)="closeInviteModal()"
+>
   <div class="invite-form">
     <div class="form-field">
       <label for="usernameOrEmail">Username or Email *</label>
-      <input 
-        pInputText 
-        id="usernameOrEmail" 
-        type="text" 
+      <input
+        pInputText
+        id="usernameOrEmail"
+        type="text"
         [(ngModel)]="inviteUsernameOrEmail"
         placeholder="Enter username or email address"
         class="form-input"
         [disabled]="invitingUser"
-        (keyup.enter)="inviteUser()">
+        (keyup.enter)="inviteUser()"
+      />
     </div>
-    
+
     <div class="form-info">
       <div class="info-icon">
         <i class="pi pi-info-circle"></i>
       </div>
-      <span>If the user is registered, they'll receive an instant invitation. Otherwise, we'll send them an email invite.</span>
+      <span
+        >If the user is registered, they'll receive an instant invitation.
+        Otherwise, we'll send them an email invite.</span
+      >
     </div>
   </div>
-  
+
   <ng-template pTemplate="footer">
     <div class="modal-footer">
-      <button 
-        pButton 
-        type="button" 
-        label="Cancel" 
+      <button
+        pButton
+        type="button"
+        label="Cancel"
         class="cancel-btn"
         (click)="closeInviteModal()"
-        [disabled]="invitingUser">
-      </button>
-      <button 
-        pButton 
-        type="button" 
-        label="Send Invite" 
+        [disabled]="invitingUser"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Send Invite"
         icon="pi pi-send"
         class="create-btn"
         (click)="inviteUser()"
         [disabled]="!inviteUsernameOrEmail.trim() || invitingUser"
-        [loading]="invitingUser">
-      </button>
+        [loading]="invitingUser"
+      ></button>
     </div>
   </ng-template>
 </p-dialog>
 
 <!-- Board Members Modal -->
-<p-dialog 
-  header="Board Members" 
-  [(visible)]="showMembersModalVisible" 
-  [modal]="true" 
-  [style]="{width: '700px'}"
+<p-dialog
+  header="Board Members"
+  [(visible)]="showMembersModalVisible"
+  [modal]="true"
+  [style]="{ width: '700px' }"
   [closable]="true"
   [draggable]="false"
   styleClass="custom-modal"
-  (onHide)="closeMembersModal()">
-  
+  (onHide)="closeMembersModal()"
+>
   <div class="members-list">
     <div class="members-header">
       <h3>{{ boardMembers.length }} Members</h3>
-      <button 
-        pButton 
-        type="button" 
+      <button
+        pButton
+        type="button"
         icon="pi pi-user-plus"
         label="Invite More"
         class="p-button-outlined"
-        (click)="showInviteModal()">
-      </button>
+        (click)="showInviteModal()"
+      ></button>
     </div>
-    
+
     <div class="member-items">
-      <div 
-        class="member-item" 
+      <div
+        class="member-item"
         *ngFor="let member of boardMembers"
-        [class.pending]="member.status === 'PENDING'">
-        
+        [class.pending]="member.status === 'PENDING'"
+      >
         <div class="member-avatar">
           <i class="pi pi-user"></i>
         </div>
-        
+
         <div class="member-info">
-          <h4>{{ member.firstName && member.lastName ? (member.firstName + ' ' + member.lastName) : member.username }}</h4>
+          <h4>
+            {{
+              member.firstName && member.lastName
+                ? member.firstName + " " + member.lastName
+                : member.username
+            }}
+          </h4>
           <p>{{ member.email }}</p>
           <div class="member-meta">
-            <span class="status-badge" [class]="'status-' + member.status.toLowerCase()">
+            <span
+              class="status-badge"
+              [class]="'status-' + member.status.toLowerCase()"
+            >
               {{ member.status }}
             </span>
             <span class="role-badge" *ngIf="member.isAdmin">
               <i class="pi pi-crown"></i> Admin
             </span>
             <span class="join-date" *ngIf="member.joinedAt">
-              Joined {{ member.joinedAt | date:'MMM d, y' }}
+              Joined {{ member.joinedAt | date : "MMM d, y" }}
             </span>
             <span class="invite-date" *ngIf="!member.joinedAt">
-              Invited {{ member.invitedAt | date:'MMM d, y' }}
+              Invited {{ member.invitedAt | date : "MMM d, y" }}
             </span>
           </div>
         </div>
-        
+
         <div class="member-actions" *ngIf="member.status === 'ACCEPTED'">
-          <button 
-            pButton 
-            type="button" 
-            icon="pi pi-cog"
-            class="p-button-text p-button-sm"
-            title="Member settings">
-          </button>
+          <button
+            *ngIf="isOwner() && member.userId !== currentUser.userId"
+            pButton
+            type="button"
+            icon="pi pi-trash"
+            class="p-button-danger p-button-text p-button-sm"
+            [loading]="removingMemberId === member.userId"
+            (click)="removeMember(member, $event)"
+            title="Remove member"
+          ></button>
+          <button
+            *ngIf="member.userId === currentUser.userId && !isOwner()"
+            pButton
+            type="button"
+            icon="pi pi-sign-out"
+            class="p-button-secondary p-button-text p-button-sm"
+            (click)="leaveBoard($event)"
+            title="Leave board"
+          ></button>
         </div>
       </div>
-      
+
       <div class="empty-members" *ngIf="boardMembers.length === 0">
         <div class="empty-icon">
           <i class="pi pi-users"></i>
@@ -615,18 +701,19 @@
       </div>
     </div>
   </div>
-  
+
   <ng-template pTemplate="footer">
     <div class="modal-footer">
-      <button 
-        pButton 
-        type="button" 
-        label="Close" 
+      <button
+        pButton
+        type="button"
+        label="Close"
         class="cancel-btn"
-        (click)="closeMembersModal()">
-      </button>
+        (click)="closeMembersModal()"
+      ></button>
     </div>
   </ng-template>
 </p-dialog>
 
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
 <p-toast></p-toast>

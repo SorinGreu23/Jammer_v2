@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 import { Router } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
 import {
@@ -29,7 +32,15 @@ export interface BoardWithDetails extends Board {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ButtonModule, DialogModule, InputTextModule],
+  imports: [
+    CommonModule,
+    ButtonModule,
+    DialogModule,
+    InputTextModule,
+    ConfirmDialogModule,
+    ToastModule,
+  ],
+  providers: [ConfirmationService, MessageService],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -51,7 +62,9 @@ export class DashboardComponent implements OnInit {
     private authService: AuthService,
     private boardService: BoardService,
     private workspaceService: WorkspaceService,
-    private router: Router
+    private router: Router,
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -138,32 +151,74 @@ export class DashboardComponent implements OnInit {
   }
 
   createBoard(): void {
-    if (!this.newBoardName.trim()) {
-      return;
-    }
+    if (!this.currentUser) return;
 
     this.creatingBoard = true;
-
-    const request: CreateBoardRequest = {
-      name: this.newBoardName.trim(),
-      userId: this.currentUser.userId,
-    };
-
-    this.boardService.createBoard(request).subscribe({
-      next: (response) => {
-        console.log('Board created successfully:', response);
-        this.closeCreateModal();
-        // Refresh the boards list
-        this.loadBoardsAndWorkspaces();
-      },
-      error: (error) => {
-        console.error('Error creating board:', error);
-        this.creatingBoard = false;
-      },
-    });
+    this.boardService
+      .createBoard({
+        name: this.newBoardName,
+        userId: this.currentUser.userId,
+        username: this.currentUser.username,
+      })
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Board created successfully',
+          });
+          this.closeCreateModal();
+          this.loadBoardsAndWorkspaces();
+        },
+        error: (error) => {
+          console.error('Error creating board:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to create board. Please try again.',
+          });
+        },
+        complete: () => {
+          this.creatingBoard = false;
+        },
+      });
   }
 
   onLogout(): void {
     this.authService.logout();
+  }
+
+  deleteBoard(board: BoardWithDetails, event: Event): void {
+    event.stopPropagation(); // Prevent board click event
+
+    this.confirmationService.confirm({
+      message: `Are you sure you want to delete the board "${board.name}"? This action cannot be undone and will remove access for all members.`,
+      header: 'Delete Board',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.boardService.deleteBoard(board.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'Board deleted successfully',
+            });
+            this.loadBoardsAndWorkspaces();
+          },
+          error: (error) => {
+            console.error('Error deleting board:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to delete board. Please try again.',
+            });
+          },
+        });
+      },
+    });
+  }
+
+  isOwner(board: BoardWithDetails): boolean {
+    return board.isOwnWorkspace;
   }
 }

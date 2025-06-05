@@ -85,4 +85,25 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public boolean isUserWorkspaceOwner(Integer userId, Integer workspaceId) {
+        String sql = """
+            SELECT 1 FROM [Workspace].[Workspaces] 
+            WHERE [Id] = ? AND [UserId] = ?
+            """;
+        
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, workspaceId);
+            ps.setInt(2, userId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error checking workspace ownership", e);
+        }
+    }
 }

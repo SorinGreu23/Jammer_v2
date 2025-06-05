@@ -50,8 +50,19 @@
           >
             <div class="card-header">
               <h3>{{ board.name }}</h3>
-              <div class="card-icon">
-                <i class="pi pi-sitemap"></i>
+              <div class="card-actions">
+                <button
+                  *ngIf="isOwner(board)"
+                  pButton
+                  type="button"
+                  icon="pi pi-trash"
+                  class="p-button-danger p-button-text"
+                  (click)="deleteBoard(board, $event)"
+                  pTooltip="Delete Board"
+                ></button>
+                <div class="card-icon">
+                  <i class="pi pi-sitemap"></i>
+                </div>
               </div>
             </div>
 
@@ -191,3 +202,6 @@
     </div>
   </ng-template>
 </p-dialog>
+
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
+<p-toast></p-toast>

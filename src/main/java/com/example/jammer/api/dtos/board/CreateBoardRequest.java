@@ -12,8 +12,15 @@ public class CreateBoardRequest {
     @Setter
     private Integer userId;
 
-    public CreateBoardRequest(String name, Integer userId) {
+    @Getter
+    @Setter
+    private String username;
+
+    public CreateBoardRequest() {}
+
+    public CreateBoardRequest(String name, Integer userId, String username) {
         this.name = name;
         this.userId = userId;
+        this.username = username;
     }
 }
