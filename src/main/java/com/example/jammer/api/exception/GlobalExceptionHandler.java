@@ -111,6 +111,30 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(BoardNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBoardNotFoundException(BoardNotFoundException ex, WebRequest request) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.NOT_FOUND.value());
+        errorResponse.put("error", "Not Found");
+        errorResponse.put("message", ex.getMessage() != null ? ex.getMessage() : "Board not found");
+        errorResponse.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BoardDeletionNotAllowedException.class)
+    public ResponseEntity<Map<String, Object>> handleBoardDeletionNotAllowedException(BoardDeletionNotAllowedException ex, WebRequest request) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.FORBIDDEN.value());
+        errorResponse.put("error", "Forbidden");
+        errorResponse.put("message", ex.getMessage() != null ? ex.getMessage() : "Board deletion not allowed");
+        errorResponse.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex, WebRequest request) {
         Map<String, Object> errorResponse = new HashMap<>();

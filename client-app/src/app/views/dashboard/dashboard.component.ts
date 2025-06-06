@@ -207,10 +207,27 @@ export class DashboardComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error deleting board:', error);
+            
+            let errorMessage = 'Failed to delete board. Please try again.';
+            
+            // Handle specific error types
+            if (error.status === 404) {
+              errorMessage = 'Board not found. It may have already been deleted.';
+            } else if (error.status === 403) {
+              errorMessage = 'You do not have permission to delete this board. Only workspace owners can delete boards.';
+            } else if (error.status === 401) {
+              errorMessage = 'Your session has expired. Please log in again.';
+              // Redirect to login
+              this.authService.logout();
+              return;
+            } else if (error.error && error.error.message) {
+              errorMessage = error.error.message;
+            }
+            
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'Failed to delete board. Please try again.',
+              detail: errorMessage,
             });
           },
         });

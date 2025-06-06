@@ -71,9 +71,16 @@ export class BoardService {
   constructor(private http: HttpClient, private authService: AuthService) {}
 
   private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'X-User-Id': this.authService.getCurrentUserId().toString(),
-    });
+    try {
+      const userId = this.authService.getCurrentUserId();
+      return new HttpHeaders({
+        'X-User-Id': userId.toString(),
+      });
+    } catch (error) {
+      console.error('Error getting user ID for headers:', error);
+      // Navigate to login if user is not authenticated
+      throw new Error('User authentication required');
+    }
   }
 
   getBoardsByUserId(userId: number): Observable<Board[]> {

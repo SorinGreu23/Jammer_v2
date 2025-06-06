@@ -4,6 +4,8 @@ import com.example.jammer.domain.repository.BoardRepository;
 import com.example.jammer.domain.repository.TaskRepository;
 import com.example.jammer.domain.repository.WorkspaceRepository;
 import com.example.jammer.domain.model.Board;
+import com.example.jammer.api.exception.BoardNotFoundException;
+import com.example.jammer.api.exception.BoardDeletionNotAllowedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,12 +29,12 @@ public class DeleteBoardUseCase {
         // Get the board
         Board board = boardRepository.findById(boardId);
         if (board == null) {
-            throw new RuntimeException("Board not found");
+            throw new BoardNotFoundException("Board with ID " + boardId + " not found");
         }
 
         // Check if user owns the workspace
         if (!workspaceRepository.isUserWorkspaceOwner(userId, board.getWorkspaceId())) {
-            throw new RuntimeException("Only workspace owners can delete boards");
+            throw new BoardDeletionNotAllowedException("Only workspace owners can delete boards");
         }
 
         // First, delete all tasks associated with the board
